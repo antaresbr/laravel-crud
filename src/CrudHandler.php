@@ -47,7 +47,7 @@ abstract class CrudHandler
      */
     public function menuId()
     {
-        return property_exists($this, 'mneuId') ? $this->menuId : '';
+        return property_exists($this, 'menuId') ? $this->menuId : '';
     }
 
     /**
@@ -324,6 +324,8 @@ abstract class CrudHandler
                 'dirty' => $dirty,
             ]);
         }
+
+        $model->fill($delta);
 
         if (Arr::has($delta, $keyName)) {
             $model->{$keyName} = $data[$keyName];
