@@ -152,7 +152,6 @@ class CrudValidator
         $this->validator = null;
         $rules = $this->getRules($action, $pkOptions);
         if (!empty($rules)) {
-            //empty($pkOptions['uniqueExceptId']) or dd($pkOptions, $rules);
             $this->validator = Validator::make($data, $rules, $messages, $customAttributes);
             return $this->validator()->passes();
         }

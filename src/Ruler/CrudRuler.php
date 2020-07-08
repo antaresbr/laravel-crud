@@ -5,6 +5,7 @@ namespace Antares\Crud\Ruler;
 use Antares\Support\Arr;
 use Antares\Support\Options;
 use Antares\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 
 class CrudRuler
@@ -48,14 +49,17 @@ class CrudRuler
         if ($opt->includeUniqueRule) {
             $rule = $this->source->uniqueRule;
             if (!empty($rule)) {
+                if (is_string($rule) and Str::startsWith($rule, 'unique:')) {
+                    $rule = Str::replaceFirst('unique:', '', $rule);
+                }
+                if (is_string($rule)) {
+                    if (class_exists($rule) and is_subclass_of($rule, 'Illuminate\Database\Eloquent\Model')) {
+                        $rule = (new $rule)->getTable();
+                    }
+                    $rule = Rule::unique($rule);
+                }
                 if ($rule instanceof Unique) {
                     $rule->ignore($opt->uniqueExceptId, $this->source->keyName);
-                } else {
-                    $rule = Str::start($this->source->uniqueRule, 'unique:');
-                    if (!is_null($opt->uniqueExceptId)) {
-                        //$rule .= Str::start($opt->uniqueExceptId, ",{$this->source->keyName},");
-                        $rule .= Str::start($opt->uniqueExceptId, ',,');
-                    }
                 }
                 $rules[] = $rule;
             }

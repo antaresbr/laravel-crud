@@ -64,6 +64,7 @@ abstract class CrudHandler
                     'action' => $action,
                     'parent_action' => $parentAction,
                     'errors' => $this->validator->errors(),
+                    'data' => $data,
                 ]);
             }
         }
@@ -114,10 +115,25 @@ abstract class CrudHandler
     {
         $keyName = $this->model->getKeyName();
 
-        $data = (isset($keyValue) and ($keyValue != '_inner_'))
-            ? [$keyName => $keyValue]
-            : $this->attributesFromRequest('primarykey', [$keyName])
-        ;
+        if ($keyValue == '_') {
+            if ($this->request()->has("data.primarykey.{$keyName}")) {
+                $keyValue = $this->request()->input("data.primarykey.{$keyName}");
+            } elseif ($this->request()->has("data.old.{$keyName}")) {
+                $keyValue = $this->request()->input("data.old.{$keyName}");
+            } elseif ($this->request()->has('data.items')) {
+                $items = $this->request()->input('data.items');
+                if (Arr::has($items, $keyName)) {
+                    $keyValue = Arr::get($items, $keyName);
+                } else {
+                    $first = Arr::first($items);
+                    if (Arr::has($first, $keyName)) {
+                        $keyValue = Arr::get($first, $keyName);
+                    }
+                }
+            }
+        }
+
+        $data = [$keyName => $keyValue];
 
         $r = $this->validateData($data, 'primarykey', $action, ['includeUniqueRule' => false]);
         if ($r !== true) {
@@ -181,7 +197,13 @@ abstract class CrudHandler
             return $r;
         }
 
+        $keyName = $this->model->getKeyName();
+
         $this->model->fill($data);
+        if (Arr::has($data, $keyName)) {
+            $this->model->{$keyName} = Arr::get($data, $keyName);
+        }
+
         if ($this->model->save()) {
             return CrudJsonResponse::successful([
                 'action' => __FUNCTION__,
@@ -191,7 +213,7 @@ abstract class CrudHandler
 
         return CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_CREATION_ERROR, null, [
             'action' => __FUNCTION__,
-            'model' => $this->model,
+            'items' => [$this->model],
         ]);
     }
 
@@ -236,20 +258,39 @@ abstract class CrudHandler
 
         $keyName = $this->model->getKeyName();
         $r = $this->validateData($data, __FUNCTION__, null, Arr::has($old, $keyName) ? ['uniqueExceptId' => $old[$keyName]] : []);
-        //$r = $this->validateData($data, __FUNCTION__, []);
         if ($r !== true) {
             return $r;
         }
 
-        //$this->model->fill($data);
-        //$this->model->save();
+        $dirty = [];
+        foreach ($old as $fieldName => $fieldValue) {
+            if ($model->{$fieldName} != $fieldValue) {
+                $dirty[] = $fieldName;
+            }
+        }
+        if (!empty($dirty)) {
+            return CrudJsonResponse::error(CrudHttpErrors::TARGET_DATA_MODIFIED_BY_OTHERS, null, [
+                'action' => __FUNCTION__,
+                'dirty' => $dirty,
+            ]);
+        }
+
+        if (Arr::has($delta, $keyName)) {
+            $model->{$keyName} = $data[$keyName];
+        }
+
+        if ($model->isDirty()) {
+            if (!$model->update($data)) {
+                return CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_UPDATE_FAIL, null, [
+                    'action' => __FUNCTION__,
+                    'items' => [$model],
+                ]);
+            }
+        }
 
         return CrudJsonResponse::successful([
             'action' => __FUNCTION__,
             'items' => [$model],
-            'old' => $old,
-            'delta' => $delta,
-            'data' => $data,
         ]);
     }
 
@@ -267,14 +308,16 @@ abstract class CrudHandler
             return $model;
         }
 
-        $data = $this->attributesFromRequest('data');
-
-        //$model->destroy()
+        if (!$model->delete()) {
+            return CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_DELETE_FAIL, null, [
+                'action' => __FUNCTION__,
+                'items' => [$model],
+            ]);
+        }
 
         return CrudJsonResponse::successful([
             'action' => __FUNCTION__,
             'items' => [$model],
-            'data' => $data,
         ]);
     }
 }
