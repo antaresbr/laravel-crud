@@ -41,11 +41,43 @@ abstract class CrudHandler
     protected $model;
 
     /**
+     * Acessor for menuId property
+     *
+     * @return string
+     */
+    public function menuId()
+    {
+        return property_exists($this, 'mneuId') ? $this->menuId : '';
+    }
+
+    /**
      * Crud validador for this handler
      *
      * @var CrudValidator
      */
     protected $validator;
+
+    /**
+     * Authorize action
+     *
+     * @param string $action
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    public function authorize($action)
+    {
+        if (empty($this->menuId())) {
+            return CrudJsonResponse::error(CrudHttpErrors::MENUID_NOT_DEFINED, null, [
+                'action' => $action,
+            ]);
+        }
+
+        $action = Str::join('/', $this->menuId(), $action);
+
+        //-- TODO : implement authorize function in laravel-acl
+        // return Acl::authorize($action);
+
+        return true;
+    }
 
     /**
      * Validate some data for the supplied action
@@ -158,7 +190,10 @@ abstract class CrudHandler
      */
     public function index(Request $request)
     {
-        $this->request = $request;
+        $r = $this->authorize(__FUNCTION__);
+        if ($r !== true) {
+            return $r;
+        }
 
         if ($request->has('data.meta.pagination.target_page')) {
             $request->merge(['page' => $request->input('data.meta.pagination.target_page')]);
@@ -190,6 +225,11 @@ abstract class CrudHandler
      */
     public function store(Request $request)
     {
+        $r = $this->authorize(__FUNCTION__);
+        if ($r !== true) {
+            return $r;
+        }
+
         $data = $this->attributesFromRequest('new');
 
         $r = $this->validateData($data, __FUNCTION__);
@@ -225,6 +265,11 @@ abstract class CrudHandler
      */
     public function show($id)
     {
+        $r = $this->authorize(__FUNCTION__);
+        if ($r !== true) {
+            return $r;
+        }
+
         $model = $this->getModelByPrimaryKey(__FUNCTION__, $id);
 
         if ($model instanceof \Illuminate\Http\JsonResponse) {
@@ -246,6 +291,11 @@ abstract class CrudHandler
      */
     public function update(Request $request, $id)
     {
+        $r = $this->authorize(__FUNCTION__);
+        if ($r !== true) {
+            return $r;
+        }
+
         $model = $this->getModelByPrimaryKey(__FUNCTION__, $id);
 
         if ($model instanceof \Illuminate\Http\JsonResponse) {
@@ -302,6 +352,11 @@ abstract class CrudHandler
      */
     public function destroy($id)
     {
+        $r = $this->authorize(__FUNCTION__);
+        if ($r !== true) {
+            return $r;
+        }
+
         $model = $this->getModelByPrimaryKey(__FUNCTION__, $id);
 
         if ($model instanceof \Illuminate\Http\JsonResponse) {
