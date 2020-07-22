@@ -20,6 +20,7 @@
         "antaresbr/arrayhandler": "*",
         "antaresbr/laravel-http": "*",
         "antaresbr/options": "*",
+        "antaresbr/picklist": "*",
         "antaresbr/stringhandler": "*"
     },
     "autoload": {

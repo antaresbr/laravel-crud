@@ -9,11 +9,15 @@ class CrudModel extends Model
     public function defaultMetadata()
     {
         return [
-            'filters' => null,
+            'filters' => [
+                'static' => null,
+                'custom' => null,
+            ],
             'order' => empty($this->primaryKey) ? null : [['field' => $this->primaryKey, 'type' => 'asc']],
             'pagination' => [
                 'per_page' => config('crud.model.metadata.pagination.per_page', 30),
             ],
+            'fields' => null,
         ];
     }
 
@@ -21,8 +25,13 @@ class CrudModel extends Model
 
     public function &metadata()
     {
-        if (empty($metadata)) {
+        if (empty($this->metadata)) {
             $this->metadata = $this->defaultMetadata();
+            if (method_exists($this, 'fieldsMetadata')) {
+                $this->metadata['fields'] = $this->fieldsMetadata();
+            } elseif (property_exists($this, 'fieldsMetadata')) {
+                $this->metadata['fields'] = $this->fieldsMetadata;
+            }
         }
 
         return $this->metadata;

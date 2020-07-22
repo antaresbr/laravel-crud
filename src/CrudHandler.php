@@ -9,6 +9,7 @@ use Antares\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Support\Facades\DB;
 
 abstract class CrudHandler
 {
@@ -96,7 +97,7 @@ abstract class CrudHandler
                     'action' => $action,
                     'parent_action' => $parentAction,
                     'errors' => $this->validator->errors(),
-                    'data' => $data,
+                    'source' => $data,
                 ]);
             }
         }
@@ -105,21 +106,20 @@ abstract class CrudHandler
     }
 
     /**
-     * Extract model attributes from current request
+     * Extract model attributes from source array
      *
-     * @param string $dataPrefix
+     * @param array $source
      * @param array $attributes
      * @return array
      */
-    public function attributesFromRequest(string $dataPrefix = '', array $attributes = [])
+    public function attributesFromData(array $source, array $attributes = [])
     {
-        $dataPrefix = empty($dataPrefix) ? 'data' : Str::start($dataPrefix, 'data.');
-
         if (empty($attributes)) {
             $attributes = $this->model->getAttributes();
         }
-
-        $source = $this->request()->has($dataPrefix) ? $this->request()->input($dataPrefix) : [];
+        if (!empty($attributes) and !in_array('uuid', $attributes)) {
+            $attributes[] = 'uuid';
+        }
 
         if (!empty($source) or empty($attributes)) {
             return $source;
@@ -134,6 +134,32 @@ abstract class CrudHandler
         }
 
         return $data;
+    }
+
+    /**
+     * Extract model attributes from current request
+     *
+     * @param string $dataPrefix
+     * @param array $attributes
+     * @return array
+     */
+    public function attributesFromRequest(string $dataPrefix = '', array $attributes = [])
+    {
+        $dataPrefix = empty($dataPrefix) ? 'data' : Str::start($dataPrefix, 'data.');
+
+        $source = $this->request()->has($dataPrefix) ? $this->request()->input($dataPrefix) : [];
+
+        return $this->attributesFromData($source, $attributes);
+    }
+
+    /**
+     * Get pkOtions for get model by primary key method
+     *
+     * @return array
+     */
+    public function getModelByPrimaryKey_pkOptions()
+    {
+        return ['includeUniqueRule' => false];
     }
 
     /**
@@ -167,12 +193,13 @@ abstract class CrudHandler
 
         $data = [$keyName => $keyValue];
 
-        $r = $this->validateData($data, 'primarykey', $action, ['includeUniqueRule' => false]);
+        $r = $this->validateData($data, 'primarykey', $action, $this->getModelByPrimaryKey_pkOptions());
         if ($r !== true) {
             return $r;
         }
 
-        if ($model = $this->model->query()->find($data[$keyName])) {
+        $modelClass = get_class($this->model);
+        if ($model = $modelClass::find($data[$keyName])) {
             return $model;
         }
 
@@ -181,6 +208,66 @@ abstract class CrudHandler
             'parent_action' => $action,
             'target' => $data,
         ]);
+    }
+
+    /**
+     * Get crud metadata.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function metadata(Request $request)
+    {
+        $metadata = $this->model->metadata();
+
+        $picklists = [];
+        foreach ($metadata['fields'] as $key => $value) {
+            if (is_array($value) and Arr::has($value, 'picklist')) {
+                $picklist = $value['picklist'];
+                if (!in_array($picklist, $picklists)) {
+                    $picklists[$picklist] = picklists()->get($picklist);
+                }
+            }
+        }
+
+        $rules = [];
+        if ($this->validator) {
+            $rules['primaykey'] = $this->validator->getRules('primarykey', $this->getModelByPrimaryKey_pkOptions());
+            $rules['index'] = $this->validator->getRules('index');
+            $rules['store'] = $this->validator->getRules('store');
+            $rules['show'] = $this->validator->getRules('show');
+            $rules['update'] = $this->validator->getRules('update');
+            $rules['destroy'] = $this->validator->getRules('destroy');
+        }
+
+        $metadata['picklists'] = $picklists;
+        $metadata['rules'] = $rules;
+
+        return CrudJsonResponse::successful([
+            'action' => __FUNCTION__,
+            'metadata' => $metadata,
+        ]);
+    }
+
+    /**
+     * Action executed before index action
+     *
+     * @param  array $metadata
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function beforeIndex(array &$metadata)
+    {
+        return true;
+    }
+
+    /**
+     * Action executed after index action
+     *
+     * @param  array $items
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function afterIndex(array &$items)
+    {
+        return true;
     }
 
     /**
@@ -195,26 +282,68 @@ abstract class CrudHandler
             return $r;
         }
 
-        if ($request->has('data.meta.pagination.target_page')) {
-            $request->merge(['page' => $request->input('data.meta.pagination.target_page')]);
+        $metadata = &$this->model->metadata();
+
+        if ($request->has('data.metadata.filters')) {
+            Arr::set($metadata, 'filters', $request->input('data.metadata.filters'));
+        }
+        if ($request->has('data.metadata.order')) {
+            Arr::set($metadata, 'order', $request->input('data.metadata.order'));
+        }
+        if ($request->has('data.metadata.pagination.target_page')) {
+            Arr::set($metadata, 'pagination.target_page', $request->input('data.metadata.pagination.target_page'));
+        }
+        if ($request->has('data.metadata.pagination.per_page')) {
+            Arr::set($metadata, 'pagination.per_page', $request->input('data.metadata.pagination.per_page'));
         }
 
-        $per_page = Arr::get($this->model->metadata(), 'pagination.per_page');
-
-        if ($request->has('data.meta.pagination.per_page')) {
-            $per_page = $request->input('data.meta.pagination.per_page');
+        $r = $this->beforeIndex($metadata);
+        if ($r !== true) {
+            return $r;
         }
 
-        $resource = ($per_page >= 0) ? $this->model->paginate($per_page) : $this->model->all();
+        if (Arr::has($metadata, 'pagination.target_page')) {
+            $request->merge(['page' => Arr::get($metadata, 'pagination.target_page')]);
+        }
 
-        $meta = $this->model->metadata();
-        $meta['pagination'] = CrudPagination::make($resource)->toArray();
+        $per_page = Arr::get($metadata, 'pagination.per_page', 0);
+        $resource = ($per_page > 0) ? $this->model->paginate($per_page) : $this->model->all();
+        $items = ($resource instanceof AbstractPaginator) ? $resource->items() : $resource->toArray();
+        $metadata['pagination'] = CrudPagination::make($resource)->toArray();
+
+        $r = $this->afterIndex($items);
+        if ($r !== true) {
+            return $r;
+        }
 
         return CrudJsonResponse::successful([
             'action' => __FUNCTION__,
-            'meta' => $meta,
-            'items' => ($resource instanceof AbstractPaginator) ? $resource->items() : $resource,
+            'metadata' => $metadata,
+            'items' => $items,
         ]);
+    }
+
+    /**
+     * Action executed before each item store action
+     *
+     * @param  array $data
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function beforeStore(array &$data)
+    {
+        return true;
+    }
+
+    /**
+     * Action executed after each item store action
+     *
+     * @param  array $data
+     * @param  \Antares\Crud\CrudModel  $model
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function afterStore(array &$data, CrudModel $model)
+    {
+        return true;
     }
 
     /**
@@ -230,31 +359,97 @@ abstract class CrudHandler
             return $r;
         }
 
-        $data = $this->attributesFromRequest('new');
-
-        $r = $this->validateData($data, __FUNCTION__);
-        if ($r !== true) {
-            return $r;
+        $items = $this->request()->has('data.items') ? $this->request()->input('data.items') : [];
+        if (empty($items)) {
+            return CrudJsonResponse::error(CrudHttpErrors::NO_DATA_SUPPLIED, null, [
+                'action' => __FUNCTION__,
+                'items' => $items,
+            ]);
         }
 
+        if (Arr::isAssoc($items)) {
+            $items = [$items];
+        }
+
+        $modelClass = get_class($this->model);
         $keyName = $this->model->getKeyName();
 
-        $this->model->fill($data);
-        if (Arr::has($data, $keyName)) {
-            $this->model->{$keyName} = Arr::get($data, $keyName);
+        $successful = [];
+        $error = [];
+
+        foreach ($items as $item) {
+            $data = $this->attributesFromData($item);
+
+            $r = $this->beforeStore($item);
+            if ($r === true) {
+                $r = $this->validateData($data, __FUNCTION__);
+            }
+            if ($r !== true) {
+                $error[] = $r->getData();
+                continue;
+            }
+
+            $model = new $modelClass();
+
+            $model->fill($data);
+            if (Arr::has($data, $keyName)) {
+                $model->{$keyName} = Arr::get($data, $keyName);
+            }
+
+            $afterOk = false;
+            DB::beginTransaction();
+
+            $dbOk = $model->save();
+
+            if ($dbOk === true) {
+                $afterOk = $this->afterStore($data, $model);
+            }
+
+            if ($dbOk === true and $afterOk === true) {
+                DB::commit();
+                $successful[] = $model;
+            } else {
+                DB::rollback();
+                $error[] = ($afterOk instanceof \Illuminate\Http\JsonResponse)
+                    ? $afterOk->getData()
+                    : CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_CREATE_FAIL, null, $model)->getData()
+                ;
+            }
         }
 
-        if ($this->model->save()) {
-            return CrudJsonResponse::successful([
-                'action' => __FUNCTION__,
-                'items' => [$this->model],
-            ], Response::HTTP_CREATED);
-        }
-
-        return CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_CREATION_ERROR, null, [
+        $resultData = [
             'action' => __FUNCTION__,
-            'items' => [$this->model],
-        ]);
+            'successful' => $successful,
+            'error' => $error,
+        ];
+
+        if (!empty($successful) and empty($error)) {
+            return CrudJsonResponse::successful($resultData, null, Response::HTTP_CREATED);
+        }
+
+        return CrudJsonResponse::error(empty($successful) ? CrudHttpErrors::ACTION_ERROR : CrudHttpErrors::PARTIALLY_SUCCESSFUL, null, $resultData);
+    }
+
+    /**
+     * Action executed before show action
+     *
+     * @param  mixed $id
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function beforeShow($id)
+    {
+        return true;
+    }
+
+    /**
+     * Action executed after show action
+     *
+     * @param  \Antares\Crud\CrudModel  $model
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function afterShow(CrudModel $model)
+    {
+        return true;
     }
 
     /**
@@ -270,16 +465,51 @@ abstract class CrudHandler
             return $r;
         }
 
+        $r = $this->beforeShow($id);
+        if ($r !== true) {
+            return $r;
+        }
+
         $model = $this->getModelByPrimaryKey(__FUNCTION__, $id);
 
         if ($model instanceof \Illuminate\Http\JsonResponse) {
             return $model;
         }
 
+        $r = $this->afterShow($model);
+        if ($r !== true) {
+            return $r;
+        }
+
         return CrudJsonResponse::successful([
             'action' => __FUNCTION__,
             'items' => [$model],
         ]);
+    }
+
+    /**
+     * Action executed before each item update action
+     *
+     * @param  array $old
+     * @param  array $delta
+     * @param  \Antares\Crud\CrudModel  $model
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function beforeUpdate(array &$old, array &$delta, CrudModel $model)
+    {
+        return true;
+    }
+
+    /**
+     * Action executed after each item update action
+     *
+     * @param  array $data
+     * @param  \Antares\Crud\CrudModel  $model
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function afterUpdate(array &$data, CrudModel $model)
+    {
+        return true;
     }
 
     /**
@@ -296,54 +526,144 @@ abstract class CrudHandler
             return $r;
         }
 
-        $model = $this->getModelByPrimaryKey(__FUNCTION__, $id);
-
-        if ($model instanceof \Illuminate\Http\JsonResponse) {
-            return $model;
-        }
-
-        $old = $this->attributesFromRequest('old');
-        $delta = $this->attributesFromRequest('delta');
-        $data = array_merge($old, $delta);
-
-        $keyName = $this->model->getKeyName();
-        $r = $this->validateData($data, __FUNCTION__, null, Arr::has($old, $keyName) ? ['uniqueExceptId' => $old[$keyName]] : []);
-        if ($r !== true) {
-            return $r;
-        }
-
-        $dirty = [];
-        foreach ($old as $fieldName => $fieldValue) {
-            if ($model->{$fieldName} != $fieldValue) {
-                $dirty[] = $fieldName;
-            }
-        }
-        if (!empty($dirty)) {
-            return CrudJsonResponse::error(CrudHttpErrors::TARGET_DATA_MODIFIED_BY_OTHERS, null, [
+        $delta = $this->request()->has('data.delta') ? $this->request()->input('data.delta') : [];
+        if (empty($delta)) {
+            return CrudJsonResponse::error(CrudHttpErrors::NO_DATA_SUPPLIED, null, [
                 'action' => __FUNCTION__,
-                'dirty' => $dirty,
+                'delta' => $delta,
+            ]);
+        }
+        if (Arr::isAssoc($delta)) {
+            $delta = [$delta];
+        }
+
+        $old = $this->request()->has('data.old') ? $this->request()->input('data.old') : [];
+        if (Arr::isAssoc($old)) {
+            $old = [$old];
+        }
+
+        if (count($delta) != count($old)) {
+            return CrudJsonResponse::error(CrudHttpErrors::ARRAY_LENGTHS_DIFFER, null, [
+                'action' => __FUNCTION__,
+                'delta' => $delta,
+                'old' => $old,
             ]);
         }
 
-        $model->fill($delta);
-
-        if (Arr::has($delta, $keyName)) {
-            $model->{$keyName} = $data[$keyName];
+        $items = [];
+        for ($i = 0; $i < count($delta); $i++) {
+            $items[$i] = [
+                'delta' => $delta[$i],
+                'old' => $old[$i],
+            ];
         }
+        $delta = null;
+        $old = null;
 
-        if ($model->isDirty()) {
-            if (!$model->update($data)) {
-                return CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_UPDATE_FAIL, null, [
+        $keyName = $this->model->getKeyName();
+
+        $successful = [];
+        $error = [];
+
+        foreach ($items as $item) {
+            $old = $this->attributesFromData($item['old']);
+            $delta = $this->attributesFromData($item['delta']);
+
+            if (!Arr::has($old, $keyName)) {
+                $error[] = CrudJsonResponse::error(CrudHttpErrors::NO_PRIMARY_KEY_SUPPLIED, null, $old)->getData();
+                continue;
+            }
+
+            $model = $this->getModelByPrimaryKey(__FUNCTION__, $old[$keyName]);
+            if ($model instanceof \Illuminate\Http\JsonResponse) {
+                $error[] = $model->getData();
+                continue;
+            }
+
+            $r = $this->beforeUpdate($old, $delta, $model);
+            if ($r !== true) {
+                $error[] = $r->getData();
+                continue;
+            }
+
+            $dirty = [];
+            foreach ($old as $fieldName => $fieldValue) {
+                if ($model->{$fieldName} != $fieldValue) {
+                    $dirty[] = $fieldName;
+                }
+            }
+            if (!empty($dirty)) {
+                $error[] = CrudJsonResponse::error(CrudHttpErrors::TARGET_DATA_MODIFIED_BY_OTHERS, null, [
                     'action' => __FUNCTION__,
-                    'items' => [$model],
-                ]);
+                    'dirty' => $dirty,
+                ])->getData();
+                continue;
+            }
+
+            $data = array_merge($old, $delta);
+            $r = $this->validateData($data, __FUNCTION__, null, ['uniqueExceptId' => $old[$keyName]]);
+            if ($r !== true) {
+                $error[] = $r->getData();
+                continue;
+            }
+
+            $model->fill($data);
+            $model->{$keyName} = $data[$keyName];
+
+            $afterOk = false;
+            DB::beginTransaction();
+
+            $dbOk = !$model->isDirty() ?: $model->save();
+
+            if ($dbOk === true) {
+                $afterOk = $this->afterUpdate($data, $model);
+            }
+
+            if ($dbOk == true and $afterOk === true) {
+                DB::commit();
+                $successful[] = $model;
+            } else {
+                DB::rollback();
+                $error[] = ($afterOk instanceof \Illuminate\Http\JsonResponse)
+                    ? $afterOk->getData()
+                    : CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_UPDATE_FAIL, null, $model)->getData()
+                ;
             }
         }
 
-        return CrudJsonResponse::successful([
+        $resultData = [
             'action' => __FUNCTION__,
-            'items' => [$model],
-        ]);
+            'successful' => $successful,
+            'error' => $error,
+        ];
+
+        if (!empty($successful) and empty($error)) {
+            return CrudJsonResponse::successful($resultData);
+        }
+
+        return CrudJsonResponse::error(empty($successful) ? CrudHttpErrors::ACTION_ERROR : CrudHttpErrors::PARTIALLY_SUCCESSFUL, null, $resultData);
+    }
+
+    /**
+     * Action executed before each item destroy action
+     *
+     * @param  \Antares\Crud\CrudModel  $model
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function beforeDestroy(CrudModel $model)
+    {
+        return true;
+    }
+
+    /**
+     * Action executed after each item destroy action
+     *
+     * @param  \Antares\Crud\CrudModel  $model
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    protected function afterDestroy(CrudModel $model)
+    {
+        return true;
     }
 
     /**
@@ -359,22 +679,69 @@ abstract class CrudHandler
             return $r;
         }
 
-        $model = $this->getModelByPrimaryKey(__FUNCTION__, $id);
+        $keyName = $this->model->getKeyName();
 
-        if ($model instanceof \Illuminate\Http\JsonResponse) {
-            return $model;
+        $items = $this->request()->has('data.items') ? $this->request()->input('data.items') : [];
+        if (empty($items)) {
+            $items[$keyName] = $id;
         }
 
-        if (!$model->delete()) {
-            return CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_DELETE_FAIL, null, [
-                'action' => __FUNCTION__,
-                'items' => [$model],
-            ]);
+        if (Arr::isAssoc($items)) {
+            $items = [$items];
         }
 
-        return CrudJsonResponse::successful([
+        $successful = [];
+        $error = [];
+
+        foreach ($items as $item) {
+            if (!Arr::has($item, $keyName)) {
+                $error[] = CrudJsonResponse::error(CrudHttpErrors::NO_PRIMARY_KEY_SUPPLIED, null, $item)->getData();
+                continue;
+            }
+
+            $model = $this->getModelByPrimaryKey(__FUNCTION__, $item[$keyName]);
+            if ($model instanceof \Illuminate\Http\JsonResponse) {
+                $error[] = $model->getData();
+                continue;
+            }
+
+            $r = $this->beforeDestroy($model);
+            if ($r !== true) {
+                $error[] = $r->getData();
+                continue;
+            }
+
+            $afterOk = false;
+            DB::beginTransaction();
+
+            $dbOk = $model->delete();
+
+            if ($dbOk === true) {
+                $afterOk = $this->afterDestroy($model);
+            }
+
+            if ($dbOk === true and $afterOk === true) {
+                DB::commit();
+                $successful[] = $model;
+            } else {
+                DB::rollback();
+                $error[] = ($afterOk instanceof \Illuminate\Http\JsonResponse)
+                    ? $afterOk->getData()
+                    : CrudJsonResponse::error(CrudHttpErrors::DATA_MODEL_DELETE_FAIL, null, $model)->getData()
+                ;
+            }
+        }
+
+        $resultData = [
             'action' => __FUNCTION__,
-            'items' => [$model],
-        ]);
+            'successful' => $successful,
+            'error' => $error,
+        ];
+
+        if (!empty($successful) and empty($error)) {
+            return CrudJsonResponse::successful($resultData);
+        }
+
+        return CrudJsonResponse::error(empty($successful) ? CrudHttpErrors::ACTION_ERROR : CrudHttpErrors::PARTIALLY_SUCCESSFUL, null, $resultData);
     }
 }
