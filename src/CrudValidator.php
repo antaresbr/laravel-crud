@@ -65,7 +65,7 @@ class CrudValidator
      * @param bool $pkOptions
      * @return array
      */
-    public function getPrimarykeyRules(array $pkOptions = [])
+    public function getPrimaryKeyRules(array $pkOptions = [])
     {
         $rules = [];
         if (!property_exists($this, 'primaryKey') or empty($this->primaryKey['keyName'])) {
@@ -82,22 +82,22 @@ class CrudValidator
 
     public function getStoreRules(array $pkOptions = [])
     {
-        return $this->getPrimarykeyRules($pkOptions) + $this->defaulRules();
+        return $this->getPrimaryKeyRules($pkOptions) + $this->defaulRules();
     }
 
     public function getShowRules(array $pkOptions = [])
     {
-        return $this->getPrimarykeyRules($pkOptions);
+        return $this->getPrimaryKeyRules($pkOptions);
     }
 
     public function getUpdateRules(array $pkOptions = [])
     {
-        return $this->getPrimarykeyRules($pkOptions) + $this->defaulRules();
+        return $this->getPrimaryKeyRules($pkOptions) + $this->defaulRules();
     }
 
     public function getDestroyRules(array $pkOptions = [])
     {
-        return $this->getPrimarykeyRules($pkOptions);
+        return $this->getPrimaryKeyRules($pkOptions);
     }
 
     /**

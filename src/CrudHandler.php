@@ -174,8 +174,8 @@ abstract class CrudHandler
         $keyName = $this->model->getKeyName();
 
         if ($keyValue == '_') {
-            if ($this->request()->has("data.primarykey.{$keyName}")) {
-                $keyValue = $this->request()->input("data.primarykey.{$keyName}");
+            if ($this->request()->has("data.primaryKey.{$keyName}")) {
+                $keyValue = $this->request()->input("data.primaryKey.{$keyName}");
             } elseif ($this->request()->has("data.old.{$keyName}")) {
                 $keyValue = $this->request()->input("data.old.{$keyName}");
             } elseif ($this->request()->has('data.items')) {
@@ -193,7 +193,7 @@ abstract class CrudHandler
 
         $data = [$keyName => $keyValue];
 
-        $r = $this->validateData($data, 'primarykey', $action, $this->getModelByPrimaryKey_pkOptions());
+        $r = $this->validateData($data, 'primaryKey', $action, $this->getModelByPrimaryKey_pkOptions());
         if ($r !== true) {
             return $r;
         }
@@ -204,7 +204,7 @@ abstract class CrudHandler
         }
 
         return CrudJsonResponse::error(CrudHttpErrors::TARGET_DATA_MODEL_NOT_FOUND, null, [
-            'action' => 'primarykey',
+            'action' => 'primaryKey',
             'parent_action' => $action,
             'target' => $data,
         ]);
@@ -231,7 +231,7 @@ abstract class CrudHandler
 
         $rules = [];
         if ($this->validator) {
-            $rules['primaykey'] = $this->validator->getRules('primarykey', $this->getModelByPrimaryKey_pkOptions());
+            $rules['primaryKey'] = $this->validator->getRules('primaryKey', $this->getModelByPrimaryKey_pkOptions());
             $rules['index'] = $this->validator->getRules('index');
             $rules['store'] = $this->validator->getRules('store');
             $rules['show'] = $this->validator->getRules('show');
@@ -380,7 +380,7 @@ abstract class CrudHandler
         foreach ($items as $item) {
             $data = $this->attributesFromData($item);
 
-            $r = $this->beforeStore($item);
+            $r = $this->beforeStore($data);
             if ($r === true) {
                 $r = $this->validateData($data, __FUNCTION__);
             }
