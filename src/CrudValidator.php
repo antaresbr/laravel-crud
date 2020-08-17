@@ -54,6 +54,42 @@ class CrudValidator
                 $rules = method_exists($this, $method) ? $this->$method($pkOptions) : [];
             }
         }
+
+        return $rules;
+    }
+
+    /**
+     * Get the validation rules for supplied action as metadata
+     *
+     * @param string $action
+     * @param string $pkOptions
+     * @return array
+     */
+    public function getRulesAsMetadata(string $action = '', $pkOptions = [])
+    {
+        $source = $this->getRules($action, $pkOptions);
+
+        $rules = [];
+        foreach ($source as $sourceKey => $sourceValue) {
+            if (is_string($sourceValue)) {
+                $sourceValue = explode('|', $sourceValue);
+            }
+
+            $value = [];
+            foreach ($sourceValue as $valueItem) {
+                if (is_object($valueItem)) {
+                    if (method_exists($valueItem, 'toArray')) {
+                        $valueItem = $valueItem->toArray();
+                    } else {
+                        continue;
+                    }
+                }
+                $value[] = $valueItem;
+            }
+
+            $rules[$sourceKey] = $value;
+        }
+
         return $rules;
     }
 
@@ -82,7 +118,7 @@ class CrudValidator
 
     public function getStoreRules(array $pkOptions = [])
     {
-        return $this->getPrimaryKeyRules($pkOptions) + $this->defaulRules();
+        return array_merge($this->getPrimaryKeyRules($pkOptions), $this->defaulRules());
     }
 
     public function getShowRules(array $pkOptions = [])

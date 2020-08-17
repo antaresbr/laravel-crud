@@ -231,12 +231,11 @@ abstract class CrudHandler
 
         $rules = [];
         if ($this->validator) {
-            $rules['primaryKey'] = $this->validator->getRules('primaryKey', $this->getModelByPrimaryKey_pkOptions());
-            $rules['index'] = $this->validator->getRules('index');
-            $rules['store'] = $this->validator->getRules('store');
-            $rules['show'] = $this->validator->getRules('show');
-            $rules['update'] = $this->validator->getRules('update');
-            $rules['destroy'] = $this->validator->getRules('destroy');
+            $rules['index'] = $this->validator->getRulesAsMetadata('index');
+            $rules['store'] = $this->validator->getRulesAsMetadata('store');
+            $rules['show'] = $this->validator->getRulesAsMetadata('show');
+            $rules['update'] = $this->validator->getRulesAsMetadata('update');
+            $rules['destroy'] = $this->validator->getRulesAsMetadata('destroy');
         }
 
         $metadata['picklists'] = $picklists;

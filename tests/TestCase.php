@@ -1,6 +1,6 @@
 <?php
 
-namespace Antares\Http\Tests;
+namespace Antares\Crud\Tests;
 
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 

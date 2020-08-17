@@ -17,6 +17,7 @@ class CrudModel extends Model
             'pagination' => [
                 'per_page' => config('crud.model.metadata.pagination.per_page', 30),
             ],
+            'table' => $this->table,
             'fields' => null,
         ];
     }

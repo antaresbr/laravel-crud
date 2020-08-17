@@ -74,7 +74,7 @@ class CrudRuler
         }
 
         return [
-            $this->source->keyName => $rules,
+            $this->source->keyName => array_values($rules),
         ];
     }
 
