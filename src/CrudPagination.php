@@ -2,7 +2,7 @@
 
 namespace Antares\Crud;
 
-use Antares\Support\ArrayHandler\Arr;
+use Antares\Support\Arr;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Pagination\AbstractPaginator;
 
@@ -83,21 +83,23 @@ class CrudPagination implements Arrayable
         $r = new static;
 
         if ($source instanceof AbstractPaginator) {
-            $r->current_page = static::getValue($source, 'currentPage');
-            $r->last_page = static::getValue($source, 'lastPage');
-            $r->per_page = static::getValue($source, 'perPage');
+            $r->currentPage = static::getValue($source, 'currentPage');
+            $r->lastPage = static::getValue($source, 'lastPage');
+            $r->perPage = static::getValue($source, 'perPage');
             $r->from = static::getValue($source, 'firstItem');
             $r->to = static::getValue($source, 'lastItem');
             $r->total = static::getValue($source, 'total');
+            $r->targetPage = static::getValue($source, 'targetPage');
         } else {
             if (is_array($source)) {
                 $prefix = static::getPrefix($source);
-                $r->current_page = Arr::get($source, $prefix . 'current_page');
-                $r->last_page = Arr::get($source, $prefix . 'last_page');
-                $r->per_page = Arr::get($source, $prefix . 'per_page');
+                $r->currentPage = Arr::get($source, $prefix . 'currentPage');
+                $r->lastPage = Arr::get($source, $prefix . 'lastPage');
+                $r->perPage = Arr::get($source, $prefix . 'perPage');
                 $r->from = Arr::get($source, $prefix . 'from');
                 $r->to = Arr::get($source, $prefix . 'to');
                 $r->total = Arr::get($source, $prefix . 'total');
+                $r->targetPage = Arr::get($source, $prefix . 'targetPage');
             }
         }
 

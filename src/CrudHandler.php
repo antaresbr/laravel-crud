@@ -270,6 +270,35 @@ abstract class CrudHandler
     }
 
     /**
+     * Get metadata from index request
+     *
+     * @return array
+     */
+    protected function &indexGetMetadata(Request $request)
+    {
+        $metadata = &$this->model->metadata(false, true);
+
+        if ($request->has('data.metadata.filters.custom')) {
+            Arr::set($metadata, 'filters.custom', $request->input('data.metadata.filters.custom'));
+        }
+
+        $orders = $request->input('data.metadata.orders');
+        if (!empty($orders)) {
+            Arr::set($metadata, 'orders', $orders);
+        }
+
+        if ($request->has('data.metadata.pagination.perPage')) {
+            Arr::set($metadata, 'pagination.perPage', $request->input('data.metadata.pagination.perPage'));
+        }
+
+        if ($request->has('data.metadata.pagination.targetPage')) {
+            Arr::set($metadata, 'pagination.targetPage', $request->input('data.metadata.pagination.targetPage'));
+        }
+
+        return $metadata;
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
@@ -281,32 +310,28 @@ abstract class CrudHandler
             return $r;
         }
 
-        $metadata = &$this->model->metadata();
-
-        if ($request->has('data.metadata.filters')) {
-            Arr::set($metadata, 'filters', $request->input('data.metadata.filters'));
-        }
-        if ($request->has('data.metadata.order')) {
-            Arr::set($metadata, 'order', $request->input('data.metadata.order'));
-        }
-        if ($request->has('data.metadata.pagination.target_page')) {
-            Arr::set($metadata, 'pagination.target_page', $request->input('data.metadata.pagination.target_page'));
-        }
-        if ($request->has('data.metadata.pagination.per_page')) {
-            Arr::set($metadata, 'pagination.per_page', $request->input('data.metadata.pagination.per_page'));
-        }
+        $metadata = &$this->indexGetMetadata($request);
 
         $r = $this->beforeIndex($metadata);
         if ($r !== true) {
             return $r;
         }
 
-        if (Arr::has($metadata, 'pagination.target_page')) {
-            $request->merge(['page' => Arr::get($metadata, 'pagination.target_page')]);
+        $query = $this->model->query();
+
+        $orders = Arr::has($metadata, 'orders') ? $metadata['orders'] : [];
+        if (is_array($orders)) {
+            foreach ($orders as $order) {
+                $query->orderBy($order->field, $order->type);
+            }
         }
 
-        $per_page = Arr::get($metadata, 'pagination.per_page', 0);
-        $resource = ($per_page > 0) ? $this->model->paginate($per_page) : $this->model->all();
+        if (Arr::has($metadata, 'pagination.targetPage')) {
+            $request->merge(['page' => Arr::get($metadata, 'pagination.targetPage')]);
+        }
+
+        $perPage = Arr::get($metadata, 'pagination.perPage', 0);
+        $resource = ($perPage > 0) ? $query->paginate($perPage) : $query->all();
         $items = ($resource instanceof AbstractPaginator) ? $resource->items() : $resource->toArray();
         $metadata['pagination'] = CrudPagination::make($resource)->toArray();
 
