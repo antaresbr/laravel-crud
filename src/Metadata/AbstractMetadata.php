@@ -35,6 +35,11 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
         return $this->options->__get($name);
     }
 
+    public function __set(string $name, $value)
+    {
+        return $this->options->set($name, $value);
+    }
+
     public function __call(string $name, $params)
     {
         return call_user_func_array([$this->options, $name], $params);
@@ -135,17 +140,20 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
      */
     public function __construct(array $data = [])
     {
+        $this->customDefaults($data);
+
         $this->options = Options::make($data, $this->prototype())->validate();
-        $this->customDefaults();
+
         $this->customValidates();
     }
 
     /**
      * Custom defaults to be made in object construct process
      *
+     * @param array $data
      * @return void
      */
-    protected function customDefaults()
+    protected function customDefaults(array &$data)
     {
         //-- To be implemented in descendent classes, if so.
     }
@@ -163,13 +171,16 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
     /**
      * Get array representation of this object
      *
+     * @param bool $onlyDefinedProperties
      * @return array
      */
-    public function toArray()
+    public function toArray($onlyDefinedProperties = false)
     {
         $r = [];
         foreach (array_keys($this->prototype()) as $key) {
-            $r[$key] = $this->{$key};
+            if (!$onlyDefinedProperties or $this->options->has($key)) {
+                $r[$key] = $this->{$key};
+            }
         }
         return $r;
     }

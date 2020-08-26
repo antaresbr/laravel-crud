@@ -2,6 +2,8 @@
 
 namespace Antares\Crud\Metadata;
 
+use Antares\Crud\CrudException;
+
 class DataSource extends AbstractMetadata
 {
     /**
@@ -52,23 +54,26 @@ class DataSource extends AbstractMetadata
      *
      * @return void
      */
-    protected function customDefaults()
+    protected function customDefaults(array &$data)
     {
-        if ($this->type == 'picklist') {
-            if (empty($this->sourceKey)) {
-                $this->sourceKey = 'key';
+        if (!empty($data['type']) and $data['type'] == 'picklist') {
+            if (empty($data['sourceKey'])) {
+                $data['sourceKey'] = 'key';
             }
-            if (empty($this->showFields)) {
-                $this->showFields = ['label'];
+            if (empty($data['showFields'])) {
+                $data['showFields'] = ['label'];
             }
-            if (empty($this->optionFields)) {
-                $this->optionFields = ['label'];
+            if (empty($data['optionFields'])) {
+                $data['optionFields'] = ['label'];
             }
         }
 
-        if ($this->type == 'table') {
-            if (empty($this->sourceKey)) {
-                $this->sourceKey = 'id';
+        if (!empty($data['type']) and $data['type'] == 'table') {
+            if (empty($data['sourceKey'])) {
+                $data['sourceKey'] = 'id';
+            }
+            if (empty($data['api']) and !empty($data['id'])) {
+                $data['api'] = $data['id'];
             }
         }
     }
@@ -80,12 +85,64 @@ class DataSource extends AbstractMetadata
      */
     protected function customValidates()
     {
+        //--[ showFields ]--
+
         if (!empty($this->showFields) and is_string($this->showFields)) {
-            $this->showFields = explode('|', $this->showFields);
+            $fields = [];
+            foreach (explode('|', $this->showFields) as $field) {
+                $fields[$field] = [];
+            }
+            $this->showFields = $fields;
+        }
+        $fields = $this->showFields;
+        if (!is_array($fields)) {
+            throw CrudException::forInvalidObjectType('array', $fields);
+        } else {
+            $fields = [];
+            foreach ($this->showFields as $field => $props) {
+                if (is_string($props)) {
+                    $field = $props;
+                    $props = [];
+                }
+                if (is_array($props)) {
+                    $props = FieldProperties::make($props);
+                }
+                if (!($props instanceof FieldProperties)) {
+                    throw CrudException::forInvalidObjectType(FieldProperties::class, $props);
+                }
+                $fields[$field] = $props;
+            }
+            $this->showFields = $fields;
         }
 
+        //--[ optionFields ]--
+
         if (!empty($this->optionFields) and is_string($this->optionFields)) {
-            $this->optionFields = explode('|', $this->optionFields);
+            $fields = [];
+            foreach (explode('|', $this->optionFields) as $field) {
+                $fields[$field] = [];
+            }
+            $this->optionFields = $fields;
+        }
+        $fields = $this->optionFields;
+        if (!is_array($fields)) {
+            throw CrudException::forInvalidObjectType('array', $fields);
+        } else {
+            $fields = [];
+            foreach ($this->optionFields as $field => $props) {
+                if (is_string($props)) {
+                    $field = $props;
+                    $props = [];
+                }
+                if (is_array($props)) {
+                    $props = FieldProperties::make($props);
+                }
+                if (!($props instanceof FieldProperties)) {
+                    throw CrudException::forInvalidObjectType(FieldProperties::class, $props);
+                }
+                $fields[$field] = $props;
+            }
+            $this->optionFields = $fields;
         }
     }
 }

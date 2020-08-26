@@ -35,9 +35,10 @@ class CrudPagination implements Arrayable
      *
      * @param mixed $source
      * @param string $target
+     * @param mixed $default
      * @return mixed|null
      */
-    protected static function getValue($source, $target)
+    protected static function getValue($source, $target, $default = null)
     {
         if (is_object($source)) {
             if (method_exists($source, $target)) {
@@ -47,10 +48,10 @@ class CrudPagination implements Arrayable
             }
         } else {
             if (is_array($source)) {
-                return Arr::get($source, $target);
+                return Arr::get($source, $target, $default);
             }
         }
-        return null;
+        return $default;
     }
 
     /**
@@ -91,15 +92,27 @@ class CrudPagination implements Arrayable
             $r->total = static::getValue($source, 'total');
             $r->targetPage = static::getValue($source, 'targetPage');
         } else {
-            if (is_array($source)) {
-                $prefix = static::getPrefix($source);
-                $r->currentPage = Arr::get($source, $prefix . 'currentPage');
-                $r->lastPage = Arr::get($source, $prefix . 'lastPage');
-                $r->perPage = Arr::get($source, $prefix . 'perPage');
-                $r->from = Arr::get($source, $prefix . 'from');
-                $r->to = Arr::get($source, $prefix . 'to');
-                $r->total = Arr::get($source, $prefix . 'total');
-                $r->targetPage = Arr::get($source, $prefix . 'targetPage');
+            if ($source instanceof \Illuminate\Database\Eloquent\Collection) {
+                dd($source);
+                $r->currentPage = static::getValue($source, 'currentPage', 1);
+                $r->lastPage = static::getValue($source, 'lastPage', $r->currentPage);
+                $r->perPage = static::getValue($source, 'perPage', 0);
+                $r->from = static::getValue($source, 'from', 1);
+                $r->to = static::getValue($source, 'to', $source->count());
+                $r->total = static::getValue($source, 'total', $source->count());
+                $r->targetPage = static::getValue($source, 'targetPage');
+            } else {
+                if (is_array($source)) {
+                    $qItems = empty($source['items']) ? 0 : count($source['items']);
+                    $prefix = static::getPrefix($source);
+                    $r->currentPage = Arr::get($source, $prefix . 'currentPage', 1);
+                    $r->lastPage = Arr::get($source, $prefix . 'lastPage', $r->currentPage);
+                    $r->perPage = Arr::get($source, $prefix . 'perPage', 0);
+                    $r->from = Arr::get($source, $prefix . 'from', ($qItems > 0) ? 1 : 0);
+                    $r->to = Arr::get($source, $prefix . 'to', $qItems);
+                    $r->total = Arr::get($source, $prefix . 'total', $qItems);
+                    $r->targetPage = Arr::get($source, $prefix . 'targetPage');
+                }
             }
         }
 

@@ -4,6 +4,7 @@ namespace Antares\Crud;
 
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Crud\Http\CrudJsonResponse;
+use Antares\Crud\Metadata\Order;
 use Antares\Support\Arr;
 use Antares\Support\Str;
 use Illuminate\Http\Request;
@@ -211,6 +212,27 @@ abstract class CrudHandler
     }
 
     /**
+     * Get picklists from fields
+     *
+     * @param array $picklists
+     * @param array $fields
+     * @return void
+     */
+    public function getPicklistsFromFields(array &$picklists, $fields)
+    {
+        if (is_array($fields)) {
+            foreach ($fields as $field) {
+                if ($field->dataSource and $field->dataSource->type == 'picklist') {
+                    $picklist = $field->dataSource->id;
+                    if (!in_array($picklist, $picklists)) {
+                        $picklists[$picklist] = picklists($picklist);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Get crud metadata.
      *
      * @return \Illuminate\Http\Response
@@ -220,13 +242,12 @@ abstract class CrudHandler
         $metadata = $this->model->metadata();
 
         $picklists = [];
-        foreach ($metadata['fields'] as $key => $value) {
-            if (is_array($value) and Arr::has($value, 'picklist')) {
-                $picklist = $value['picklist'];
-                if (!in_array($picklist, $picklists)) {
-                    $picklists[$picklist] = picklists()->get($picklist);
-                }
-            }
+
+        if (!empty($metadata['fields'])) {
+            $this->getPicklistsFromFields($picklists, $metadata['fields']);
+        }
+        if (!empty($metadata['filters']['fields'])) {
+            $this->getPicklistsFromFields($picklists, $metadata['filters']['fields']);
         }
 
         $rules = [];
@@ -276,7 +297,7 @@ abstract class CrudHandler
      */
     protected function &indexGetMetadata(Request $request)
     {
-        $metadata = &$this->model->metadata(false, true);
+        $metadata = &$this->model->metadata(['getFields' => false]);
 
         if ($request->has('data.metadata.filters.custom')) {
             Arr::set($metadata, 'filters.custom', $request->input('data.metadata.filters.custom'));
@@ -322,6 +343,12 @@ abstract class CrudHandler
         $orders = Arr::has($metadata, 'orders') ? $metadata['orders'] : [];
         if (is_array($orders)) {
             foreach ($orders as $order) {
+                if (is_array($order)) {
+                    $order = Order::make($order);
+                }
+                if (!($order instanceof Order)) {
+                    throw CrudException::forInvalidObjectType(Order::class, $order);
+                }
                 $query->orderBy($order->field, $order->type);
             }
         }
@@ -329,9 +356,9 @@ abstract class CrudHandler
         if (Arr::has($metadata, 'pagination.targetPage')) {
             $request->merge(['page' => Arr::get($metadata, 'pagination.targetPage')]);
         }
-
         $perPage = Arr::get($metadata, 'pagination.perPage', 0);
-        $resource = ($perPage > 0) ? $query->paginate($perPage) : $query->all();
+
+        $resource = ($perPage > 0) ? $query->paginate($perPage) : $query->get();
         $items = ($resource instanceof AbstractPaginator) ? $resource->items() : $resource->toArray();
         $metadata['pagination'] = CrudPagination::make($resource)->toArray();
 
