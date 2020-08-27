@@ -14,8 +14,6 @@ class PicklistSource extends DataSource
         $prototype['type']['nullable'] = true;
         $prototype['type']['default'] = 'picklist';
 
-        //dd($prototype);
-
         return $prototype;
     }
 }

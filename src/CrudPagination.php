@@ -93,7 +93,6 @@ class CrudPagination implements Arrayable
             $r->targetPage = static::getValue($source, 'targetPage');
         } else {
             if ($source instanceof \Illuminate\Database\Eloquent\Collection) {
-                dd($source);
                 $r->currentPage = static::getValue($source, 'currentPage', 1);
                 $r->lastPage = static::getValue($source, 'lastPage', $r->currentPage);
                 $r->perPage = static::getValue($source, 'perPage', 0);
