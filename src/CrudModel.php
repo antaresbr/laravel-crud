@@ -68,8 +68,8 @@ class CrudModel extends Model
         if (empty($this->metadata)) {
             $this->metadata = $this->defaultMetadata();
 
-            $this->metadata['fields'] = ($opt->getFields === true) ? $this->getPropertiesListFromSource('fieldsMetadata', Field::class) : null;
-            $this->metadata['orders'] = ($opt->getOrders === true) ? $this->getPropertiesListFromSource('ordersMetadata', Order::class) : null;
+            $this->metadata['fields'] = ($opt->getFields === true) ? $this->getPropertiesListFromSource('fieldsMetadata', Field::class, 'name') : null;
+            $this->metadata['orders'] = ($opt->getOrders === true) ? $this->getPropertiesListFromSource('ordersMetadata', Order::class, 'field') : null;
             $this->metadata['filters'] = ($opt->getFilters === true) ? $this->filtersMetadata($opt->filtersOptions) : null;
             $this->metadata['grid'] = ($opt->getGrid === true) ? $this->gridMetadata($opt->gridOptions) : null;
 
@@ -103,13 +103,17 @@ class CrudModel extends Model
      *
      * @param string $sourceName
      * @param string $propertiesClass
+     * @param string $uniqueProperty
      * @return null|array
      */
-    private function getPropertiesListFromSource(string $sourceName, $propertiesClass)
+    private function getPropertiesListFromSource(string $sourceName, $propertiesClass, string $uniqueProperty = '')
     {
         if (!is_null($propertiesClass) and !is_string($propertiesClass)) {
             throw CrudException::forInvalidObjectType('string | null', $propertiesClass);
         }
+
+        $uniqueProperty = trim($uniqueProperty);
+        $uniqueList = [];
 
         $list = null;
 
@@ -133,6 +137,20 @@ class CrudModel extends Model
                     }
                     if (!($item instanceof $propertiesClass)) {
                         throw CrudException::forInvalidObjectType($propertiesClass, $item);
+                    }
+                }
+                if ($uniqueProperty != '') {
+                    if (!is_null($propertiesClass)) {
+                        $uniqueValue = $item->{$uniqueProperty};
+                    } else {
+                        $uniqueValue = array_key_exists($uniqueProperty, $item) ? $item[$uniqueProperty] : null;
+                    }
+                    if (!is_null($uniqueValue)) {
+                        if (in_array($uniqueValue, $uniqueList)) {
+                            throw CrudException::forAlreadyDefinedItem($uniqueValue);
+                        } else {
+                            $uniqueList[] = $uniqueValue;
+                        }
                     }
                 }
                 $list[$key] = $item;
