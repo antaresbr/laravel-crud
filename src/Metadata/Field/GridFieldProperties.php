@@ -1,6 +1,8 @@
 <?php
 
-namespace Antares\Crud\Metadata;
+namespace Antares\Crud\Metadata\Field;
+
+use Antares\Crud\Metadata\AbstractMetadata;
 
 class GridFieldProperties extends AbstractMetadata
 {

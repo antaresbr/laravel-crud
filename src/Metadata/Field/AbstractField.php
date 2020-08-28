@@ -1,6 +1,9 @@
 <?php
 
-namespace Antares\Crud\Metadata;
+namespace Antares\Crud\Metadata\Field;
+
+use Antares\Crud\Metadata\AbstractMetadata;
+use Antares\Crud\Metadata\DataSource\DataSource;
 
 abstract class AbstractField extends AbstractMetadata
 {
@@ -62,13 +65,23 @@ abstract class AbstractField extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'uicWidth' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+            ],
+            'uicHeight' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+            ],
             'uicPattern' => [
                 'type' => 'string',
                 'required' => false,
                 'nullable' => true,
             ],
             'dataSource' => [
-                'type' => 'array|Antares\Crud\Metadata\DataSource',
+                'type' => 'array|Antares\Crud\Metadata\DataSource\DataSource',
                 'required' => false,
                 'nullable' => true,
             ],

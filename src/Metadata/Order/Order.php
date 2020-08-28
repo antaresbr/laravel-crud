@@ -1,6 +1,8 @@
 <?php
 
-namespace Antares\Crud\Metadata;
+namespace Antares\Crud\Metadata\Order;
+
+use Antares\Crud\Metadata\AbstractMetadata;
 
 class Order extends AbstractMetadata
 {

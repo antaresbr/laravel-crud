@@ -1,8 +1,10 @@
 <?php
 
-namespace Antares\Crud\Metadata;
+namespace Antares\Crud\Metadata\DataSource;
 
 use Antares\Crud\CrudException;
+use Antares\Crud\Metadata\AbstractMetadata;
+use Antares\Crud\Metadata\Field\FieldProperties;
 
 class DataSource extends AbstractMetadata
 {

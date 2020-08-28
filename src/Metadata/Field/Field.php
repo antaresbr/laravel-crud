@@ -1,6 +1,6 @@
 <?php
 
-namespace Antares\Crud\Metadata;
+namespace Antares\Crud\Metadata\Field;
 
 class Field extends AbstractField
 {

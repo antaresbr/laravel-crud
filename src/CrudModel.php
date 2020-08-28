@@ -2,10 +2,10 @@
 
 namespace Antares\Crud;
 
-use Antares\Crud\Metadata\Field;
-use Antares\Crud\Metadata\FieldProperties;
-use Antares\Crud\Metadata\GridFieldProperties;
-use Antares\Crud\Metadata\Order;
+use Antares\Crud\Metadata\Field\Field;
+use Antares\Crud\Metadata\Field\FieldProperties;
+use Antares\Crud\Metadata\Field\GridFieldProperties;
+use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Options;
 use Illuminate\Database\Eloquent\Model;
 
