@@ -4,7 +4,7 @@ namespace Antares\Crud;
 
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Crud\Http\CrudJsonResponse;
-use Antares\Crud\Metadata\Order;
+use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Arr;
 use Antares\Support\Str;
 use Illuminate\Http\Request;
