@@ -135,8 +135,8 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
     /**
      * Class constructor
      *
-     * @param array $data Data to be used in this object
-     * @param array $prototypes The protorype applied to this object
+     * @param array $data
+     * @param array $prototypes
      */
     public function __construct(array $data = [])
     {

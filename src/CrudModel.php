@@ -59,6 +59,7 @@ class CrudModel extends Model
             'filtersOptions' => ['type' => 'array', 'default' => []],
             'getGrid' => ['type' => 'boolean', 'default' => true],
             'gridOptions' => ['type' => 'array', 'default' => []],
+            'getLayout' => ['type' => 'boolean', 'default' => true],
         ]);
 
         if ($opt->reset) {
@@ -76,6 +77,8 @@ class CrudModel extends Model
             if ($opt->getOrders === true and $this->metadata['orders'] == null and $this->getPropertiesListSource('ordersMetadata') === false and !empty($this->primaryKey)) {
                 $this->metadata['orders'] = Order::make(['field' => $this->primaryKey, 'type' => 'asc']);
             }
+
+            $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getPropertiesListFromSource('layoutMetadata', null) : null;
         }
 
         return $this->metadata;
@@ -158,6 +161,25 @@ class CrudModel extends Model
         }
 
         return $list;
+    }
+
+    /**
+     * Get name list from metadata.fields property
+     *
+     * @return array
+     */
+    public function getFieldsMetadataNames()
+    {
+        $metadata = $this->metadata();
+        $fieldNames = [];
+
+        if (!empty($metadata['fields'])) {
+            foreach ($$metadata['fields'] as $field) {
+                $fieldNames[] = $field['name'];
+            }
+        }
+
+        return $fieldNames;
     }
 
     /**
