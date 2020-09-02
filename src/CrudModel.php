@@ -5,6 +5,7 @@ namespace Antares\Crud;
 use Antares\Crud\Metadata\Field\Field;
 use Antares\Crud\Metadata\Field\FieldProperties;
 use Antares\Crud\Metadata\Field\GridFieldProperties;
+use Antares\Crud\Metadata\Layout\AbstractLayout;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Options;
 use Illuminate\Database\Eloquent\Model;
@@ -73,12 +74,11 @@ class CrudModel extends Model
             $this->metadata['orders'] = ($opt->getOrders === true) ? $this->getPropertiesListFromSource('ordersMetadata', Order::class, 'field') : null;
             $this->metadata['filters'] = ($opt->getFilters === true) ? $this->filtersMetadata($opt->filtersOptions) : null;
             $this->metadata['grid'] = ($opt->getGrid === true) ? $this->gridMetadata($opt->gridOptions) : null;
+            $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getPropertiesListFromSource('layoutMetadata', AbstractLayout::class) : null;
 
             if ($opt->getOrders === true and $this->metadata['orders'] == null and $this->getPropertiesListSource('ordersMetadata') === false and !empty($this->primaryKey)) {
                 $this->metadata['orders'] = Order::make(['field' => $this->primaryKey, 'type' => 'asc']);
             }
-
-            $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getPropertiesListFromSource('layoutMetadata', null) : null;
         }
 
         return $this->metadata;

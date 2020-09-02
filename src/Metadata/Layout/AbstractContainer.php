@@ -18,7 +18,7 @@ abstract class AbstractContainer extends AbstractLayout
                 'nullable' => true,
             ],
             'border' => [
-                'type' => 'boolean',
+                'type' => 'boolean|string',
                 'required' => false,
                 'nullable' => true,
                 'default' => false,
