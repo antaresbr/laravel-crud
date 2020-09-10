@@ -17,6 +17,16 @@ class GridFieldProperties extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'width' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+            ],
+            'height' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+            ],
             'gridCols' => [
                 'type' => 'integer',
                 'required' => false,

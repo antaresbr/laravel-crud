@@ -297,7 +297,7 @@ abstract class CrudHandler
      */
     protected function &indexGetMetadata(Request $request)
     {
-        $metadata = &$this->model->metadata(['getFields' => false, 'getLayout' => false]);
+        $metadata = &$this->model->metadata(['getFields' => false, 'getGrid' => false, 'getLayout' => false]);
 
         if ($request->has('data.metadata.filters.custom')) {
             Arr::set($metadata, 'filters.custom', $request->input('data.metadata.filters.custom'));
