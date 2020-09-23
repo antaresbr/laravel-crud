@@ -27,6 +27,16 @@ abstract class AbstractLayout extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'width' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+            ],
+            'height' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+            ],
         ];
     }
 }

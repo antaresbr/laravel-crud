@@ -48,6 +48,11 @@ class DataSource extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'assignFields' => [
+                'type' => 'string|array',
+                'required' => false,
+                'nullable' => true,
+            ],
         ];
     }
 
@@ -145,6 +150,33 @@ class DataSource extends AbstractMetadata
                 $fields[$field] = $props;
             }
             $this->optionFields = $fields;
+        }
+
+        //--[ assignFields ]--
+
+        if (empty($this->assignFields)) {
+            $this->assignFields = null;
+        } elseif (is_string($this->assignFields)) {
+            $assigns = [];
+            foreach (explode('|', $this->assignFields) as $assignItem) {
+                $assign = explode(':', $assignItem);
+                if (count($assign) != 2 or empty($assign[0]) or empty($assign[1])) {
+                    throw CrudException::forInvalidFieldAssign($assignItem);
+                }
+                $assigns[$assign[0]] = $assign[1];
+            }
+            $this->assignFields = $assigns;
+        }
+        if (!is_null($this->assignFields)) {
+            if (!is_array($this->assignFields)) {
+                throw CrudException::forInvalidObjectType('array', $this->assignFields);
+            } else {
+                foreach ($this->assignFields as $field => $source) {
+                    if (!is_string($field) or empty($field) or !is_string($source) or empty($source)) {
+                        throw CrudException::forInvalidFieldAssign(['field' => $field, 'source' => $source]);
+                    }
+                }
+            }
         }
     }
 }

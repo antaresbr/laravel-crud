@@ -7,19 +7,11 @@ use Exception;
 class CrudException extends Exception
 {
     /**
-     * Create a new exception for not defined data
+     * Create a new exception for invalid object type
      *
      * @param mixed $expected
      * @param mixed $got
      * @return static
-     */
-
-    /**
-     * Undocumented function
-     *
-     * @param [type] $expected
-     * @param [type] $got
-     * @return void
      */
     public static function forInvalidObjectType($expected, $got)
     {
@@ -41,5 +33,19 @@ class CrudException extends Exception
     public static function forAlreadyDefinedItem($id)
     {
         return new static("Already defined item '{$id}'.");
+    }
+
+    /**
+     * Create a new exception for invalid field assign
+     *
+     * @param mixed $assign
+     * @return static
+     */
+    public static function forInvalidFieldAssign($assign)
+    {
+        if (!is_string($assign)) {
+            $assign = print_r($assign, true);
+        }
+        return new static("Invalid field assign '{$assign}'.");
     }
 }

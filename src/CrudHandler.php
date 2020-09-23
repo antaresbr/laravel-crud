@@ -4,9 +4,11 @@ namespace Antares\Crud;
 
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Crud\Http\CrudJsonResponse;
+use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Arr;
 use Antares\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Pagination\AbstractPaginator;
@@ -293,19 +295,26 @@ abstract class CrudHandler
     /**
      * Get metadata from index request
      *
+     * @param Request $request
      * @return array
      */
     protected function &indexGetMetadata(Request $request)
     {
-        $metadata = &$this->model->metadata(['getFields' => false, 'getGrid' => false, 'getLayout' => false]);
+        $metadata = &$this->model->metadata([
+            'filtersOptions' => ['getFields' => false],
+            'getFields' => false,
+            'getGrid' => false,
+            'getLayout' => false,
+        ]);
 
-        if ($request->has('data.metadata.filters.custom')) {
-            Arr::set($metadata, 'filters.custom', $request->input('data.metadata.filters.custom'));
+        $filters = $request->input('data.metadata.filters.custom');
+        if (!empty($filters)) {
+            Arr::set($metadata, 'filters.custom', $this->model->getPropertiesListFromSource($filters, Filter::class));
         }
 
         $orders = $request->input('data.metadata.orders');
         if (!empty($orders)) {
-            Arr::set($metadata, 'orders', $orders);
+            Arr::set($metadata, 'orders', $this->model->getPropertiesListFromSource($orders, Order::class, 'field'));
         }
 
         if ($request->has('data.metadata.pagination.perPage')) {
@@ -317,6 +326,70 @@ abstract class CrudHandler
         }
 
         return $metadata;
+    }
+
+    /**
+     * Get metadata from index request
+     *
+     * @param \Illuminate\Database\Eloquent\Builder $query
+     * @param array $filters
+     * @param bool $wrapFields
+     * @return array
+     */
+    protected function indexQueryFilters(Builder $query, $filters, bool $wrapFields = true)
+    {
+        if (!empty($filters)) {
+            if ($wrapFields) {
+                $filters = [
+                    Filter::make([
+                        'filters' => $filters,
+                        'conjunction' => 'and',
+                    ]),
+                ];
+            }
+
+            foreach ($filters as $filter) {
+                if (is_array($filter)) {
+                    $filter = Filter::make($filter);
+                }
+                if (!($filter instanceof Filter)) {
+                    throw CrudException::forInvalidObjectType(Filter::class, $filter);
+                }
+
+                if (!empty($filter->filters)) {
+                    $nested = $this->model->newQueryWithoutRelationships();
+                    $this->indexQueryFilters($nested, $filter->filters, false);
+                    $query->addNestedWhereQuery($nested->getQuery(), $filter->conjunction);
+                } else {
+                    $filter->normalizeToDatabaseDriver($this->model);
+
+                    if (Str::icIn($filter->operator, 'between', 'not between')) {
+                        $query->whereBetween(
+                            $filter->column,
+                            [$filter->value, $filter->endValue],
+                            $filter->conjunction,
+                            ($filter->operator == 'not between')
+                        );
+                    } elseif (Str::icIn($filter->operator, 'in', 'not in')) {
+                        $query->whereIn(
+                            $filter->column,
+                            $filter->value,
+                            $filter->conjunction,
+                            ($filter->operator == 'not in')
+                        );
+                    } else {
+                        $query->where(
+                            $filter->column,
+                            $filter->operator,
+                            Str::icIn($filter->operator, 'like', 'not like', 'ilike', 'not ilike') ? Str::finish($filter->value, '%') : $filter->value,
+                            $filter->conjunction
+                        );
+                    }
+                }
+            }
+        }
+
+        return $query;
     }
 
     /**
@@ -340,8 +413,13 @@ abstract class CrudHandler
 
         $query = $this->model->query();
 
+        //-- filters
+        $this->indexQueryFilters($query, Arr::get($metadata, 'filters.static'));
+        $this->indexQueryFilters($query, Arr::get($metadata, 'filters.custom'));
+
+        //-- orders
         $orders = Arr::has($metadata, 'orders') ? $metadata['orders'] : [];
-        if (is_array($orders)) {
+        if (!empty($orders)) {
             foreach ($orders as $order) {
                 if (is_array($order)) {
                     $order = Order::make($order);

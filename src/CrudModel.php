@@ -5,6 +5,7 @@ namespace Antares\Crud;
 use Antares\Crud\Metadata\Field\Field;
 use Antares\Crud\Metadata\Field\FieldProperties;
 use Antares\Crud\Metadata\Field\GridFieldProperties;
+use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Crud\Metadata\Layout\AbstractLayout;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Options;
@@ -61,7 +62,7 @@ class CrudModel extends Model
             'getGrid' => ['type' => 'boolean', 'default' => true],
             'gridOptions' => ['type' => 'array', 'default' => []],
             'getLayout' => ['type' => 'boolean', 'default' => true],
-        ]);
+        ])->validate();
 
         if ($opt->reset) {
             $this->metadata = null;
@@ -104,13 +105,16 @@ class CrudModel extends Model
     /**
      * Get properties list from source
      *
-     * @param string $sourceName
+     * @param string|array $sourceNameOrData
      * @param string $propertiesClass
      * @param string $uniqueProperty
      * @return null|array
      */
-    private function getPropertiesListFromSource(string $sourceName, $propertiesClass, string $uniqueProperty = '')
+    public function getPropertiesListFromSource($sourceNameOrData, $propertiesClass, string $uniqueProperty = '')
     {
+        if (!is_string($sourceNameOrData) and !is_array($sourceNameOrData)) {
+            throw CrudException::forInvalidObjectType('string | array', $sourceNameOrData);
+        }
         if (!is_null($propertiesClass) and !is_string($propertiesClass)) {
             throw CrudException::forInvalidObjectType('string | null', $propertiesClass);
         }
@@ -120,7 +124,7 @@ class CrudModel extends Model
 
         $list = null;
 
-        $source = $this->getPropertiesListSource($sourceName);
+        $source = is_array($sourceNameOrData) ? $sourceNameOrData : $this->getPropertiesListSource($sourceNameOrData);
         if ($source !== false) {
             if (is_string($source)) {
                 $source = explode('|', $source);
@@ -191,14 +195,14 @@ class CrudModel extends Model
     public function filtersMetadata(array $options = [])
     {
         $opt = Options::make($options, [
-            'getStatic' => ['type' => 'boolean', 'default' => false],
-            'getCustom' => ['type' => 'boolean', 'default' => false],
+            'getStatic' => ['type' => 'boolean', 'default' => true],
+            'getCustom' => ['type' => 'boolean', 'default' => true],
             'getFields' => ['type' => 'boolean', 'default' => true],
-        ]);
+        ])->validate();
 
         $filters = [
-            'static' => ($opt->getStatic === true) ? $this->getPropertiesListFromSource('filtersStaticMetadata', null) : null,
-            'custom' => ($opt->getCustom === true) ? $this->getPropertiesListFromSource('filtersCustomMetadata', null) : null,
+            'static' => ($opt->getStatic === true) ? $this->getPropertiesListFromSource('filtersStaticMetadata', Filter::class) : null,
+            'custom' => ($opt->getCustom === true) ? $this->getPropertiesListFromSource('filtersCustomMetadata', Filter::class) : null,
             'fields' => ($opt->getFields === true) ? $this->getPropertiesListFromSource('filtersFieldsMetadata', FieldProperties::class) : null,
         ];
 
@@ -215,7 +219,7 @@ class CrudModel extends Model
     {
         $opt = Options::make($options, [
             'getFields' => ['type' => 'boolean', 'default' => true],
-        ]);
+        ])->validate();
 
         $grid = [
             'fields' => ($opt->getFields === true) ? $this->getPropertiesListFromSource('gridFieldsMetadata', GridFieldProperties::class) : null,
