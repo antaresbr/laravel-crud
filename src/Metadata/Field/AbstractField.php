@@ -147,6 +147,7 @@ abstract class AbstractField extends AbstractMetadata
             'radio',
             'search',
             'select',
+            'switch',
             'text',
             'textarea',
             'time',
