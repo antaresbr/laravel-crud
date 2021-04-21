@@ -16,7 +16,7 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7",
+        "php": ">=7",
         "antaresbr/arrayhandler": "*",
         "antaresbr/laravel-http": "*",
         "antaresbr/options": "*",
@@ -32,7 +32,7 @@
         }
     },
     "require-dev": {
-        "orchestra/testbench": "^5"
+        "orchestra/testbench": "^6"
     },
     "autoload-dev": {
         "psr-4": {
