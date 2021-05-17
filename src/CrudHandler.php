@@ -45,43 +45,11 @@ abstract class CrudHandler
     protected $model;
 
     /**
-     * Acessor for menuId property
-     *
-     * @return string
-     */
-    public function menuId()
-    {
-        return property_exists($this, 'menuId') ? $this->menuId : '';
-    }
-
-    /**
      * Crud validador for this handler
      *
      * @var CrudValidator
      */
     protected $validator;
-
-    /**
-     * Authorize action
-     *
-     * @param string $action
-     * @return bool|\Illuminate\Http\JsonResponse
-     */
-    public function authorize($action)
-    {
-        if (empty($this->menuId())) {
-            return CrudJsonResponse::error(CrudHttpErrors::MENUID_NOT_DEFINED, null, [
-                'action' => $action,
-            ]);
-        }
-
-        $action = Str::join('/', $this->menuId(), $action);
-
-        //-- TODO : implement authorize function in laravel-acl
-        // return Acl::authorize($action);
-
-        return true;
-    }
 
     /**
      * Validate some data for the supplied action
@@ -399,11 +367,6 @@ abstract class CrudHandler
      */
     public function index(Request $request)
     {
-        $r = $this->authorize(__FUNCTION__);
-        if ($r !== true) {
-            return $r;
-        }
-
         $metadata = &$this->indexGetMetadata($request);
 
         $r = $this->beforeIndex($metadata);
@@ -483,11 +446,6 @@ abstract class CrudHandler
      */
     public function store(Request $request)
     {
-        $r = $this->authorize(__FUNCTION__);
-        if ($r !== true) {
-            return $r;
-        }
-
         $items = $this->request()->has('data.items') ? $this->request()->input('data.items') : [];
         if (empty($items)) {
             return CrudJsonResponse::error(CrudHttpErrors::NO_DATA_SUPPLIED, null, [
@@ -589,11 +547,6 @@ abstract class CrudHandler
      */
     public function show($id)
     {
-        $r = $this->authorize(__FUNCTION__);
-        if ($r !== true) {
-            return $r;
-        }
-
         $r = $this->beforeShow($id);
         if ($r !== true) {
             return $r;
@@ -650,11 +603,6 @@ abstract class CrudHandler
      */
     public function update(Request $request, $id)
     {
-        $r = $this->authorize(__FUNCTION__);
-        if ($r !== true) {
-            return $r;
-        }
-
         $delta = $this->request()->has('data.delta') ? $this->request()->input('data.delta') : [];
         if (empty($delta)) {
             return CrudJsonResponse::error(CrudHttpErrors::NO_DATA_SUPPLIED, null, [
@@ -803,11 +751,6 @@ abstract class CrudHandler
      */
     public function destroy($id)
     {
-        $r = $this->authorize(__FUNCTION__);
-        if ($r !== true) {
-            return $r;
-        }
-
         $keyName = $this->model->getKeyName();
 
         $items = $this->request()->has('data.items') ? $this->request()->input('data.items') : [];
