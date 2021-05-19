@@ -28,16 +28,6 @@ class CrudController extends Controller
     }
 
     /**
-     * Get metadata of the the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function metadata(Request $request)
-    {
-        return $this->handler()->metadata($request);
-    }
-
-    /**
      * Execute de authorization for the method, if aclAuthorize method is defined
      *
      * @param string $method
@@ -60,13 +50,26 @@ class CrudController extends Controller
     }
 
     /**
+     * Get metadata of the the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function metadata(Request $request)
+    {
+        if (($acl = $this->crudAuthorize(__FUNCTION__)) !== true) {
+            return $acl;
+        }
+        return $this->handler()->metadata($request);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
     {
-        if (($acl = $this->crudAuthorize(__METHOD__)) !== true) {
+        if (($acl = $this->crudAuthorize(__FUNCTION__)) !== true) {
             return $acl;
         }
         return $this->handler()->index($request);
@@ -80,7 +83,7 @@ class CrudController extends Controller
      */
     public function store(Request $request)
     {
-        if (($acl = $this->crudAuthorize(__METHOD__)) !== true) {
+        if (($acl = $this->crudAuthorize(__FUNCTION__)) !== true) {
             return $acl;
         }
         return $this->handler()->store($request);
@@ -94,7 +97,7 @@ class CrudController extends Controller
      */
     public function show($id)
     {
-        if (($acl = $this->crudAuthorize(__METHOD__)) !== true) {
+        if (($acl = $this->crudAuthorize(__FUNCTION__)) !== true) {
             return $acl;
         }
         return $this->handler()->show($id);
@@ -109,7 +112,7 @@ class CrudController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (($acl = $this->crudAuthorize(__METHOD__)) !== true) {
+        if (($acl = $this->crudAuthorize(__FUNCTION__)) !== true) {
             return $acl;
         }
         return $this->handler()->update($request, $id);
@@ -123,7 +126,7 @@ class CrudController extends Controller
      */
     public function destroy($id)
     {
-        if (($acl = $this->crudAuthorize(__METHOD__)) !== true) {
+        if (($acl = $this->crudAuthorize(__FUNCTION__)) !== true) {
             return $acl;
         }
         return $this->handler()->destroy($id);
