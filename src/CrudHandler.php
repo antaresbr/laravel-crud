@@ -394,7 +394,6 @@ abstract class CrudHandler
             'action' => __FUNCTION__,
             'metadata' => $metadata,
             'items' => $items,
-            'dataSourceFields' => $this->model->getDataSourceFields(),
         ]);
     }
 
