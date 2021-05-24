@@ -182,27 +182,6 @@ abstract class CrudHandler
     }
 
     /**
-     * Get picklists from fields
-     *
-     * @param array $picklists
-     * @param array $fields
-     * @return void
-     */
-    public function getPicklistsFromFields(array &$picklists, $fields)
-    {
-        if (is_array($fields)) {
-            foreach ($fields as $field) {
-                if ($field->dataSource and $field->dataSource->type == 'picklist') {
-                    $picklist = $field->dataSource->id;
-                    if (!in_array($picklist, $picklists)) {
-                        $picklists[$picklist] = picklists($picklist);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
      * Get crud metadata.
      *
      * @return \Illuminate\Http\Response
@@ -214,10 +193,10 @@ abstract class CrudHandler
         $picklists = [];
 
         if (!empty($metadata['fields'])) {
-            $this->getPicklistsFromFields($picklists, $metadata['fields']);
+            $this->model->getPicklistsFromFields($picklists, $metadata['fields']);
         }
         if (!empty($metadata['filters']['fields'])) {
-            $this->getPicklistsFromFields($picklists, $metadata['filters']['fields']);
+            $this->model->getPicklistsFromFields($picklists, $metadata['filters']['fields']);
         }
 
         $rules = [];
@@ -400,8 +379,11 @@ abstract class CrudHandler
         $perPage = Arr::get($metadata, 'pagination.perPage', 0);
 
         $resource = ($perPage > 0) ? $query->paginate($perPage) : $query->get();
+
         $items = ($resource instanceof AbstractPaginator) ? $resource->items() : $resource->toArray();
         $metadata['pagination'] = CrudPagination::make($resource)->toArray();
+
+        $this->model->relationsToObjects($items);
 
         $r = $this->afterIndex($items);
         if ($r !== true) {
@@ -412,6 +394,7 @@ abstract class CrudHandler
             'action' => __FUNCTION__,
             'metadata' => $metadata,
             'items' => $items,
+            'dataSourceFields' => $this->model->getDataSourceFields(),
         ]);
     }
 
@@ -458,6 +441,8 @@ abstract class CrudHandler
             $items = [$items];
         }
 
+        $this->model->relationsFromObjects($items);
+
         $modelClass = get_class($this->model);
         $keyName = $this->model->getKeyName();
 
@@ -503,6 +488,8 @@ abstract class CrudHandler
                 ;
             }
         }
+
+        $this->model->relationsToObjects($successful);
 
         $resultData = [
             'action' => __FUNCTION__,
@@ -563,9 +550,12 @@ abstract class CrudHandler
             return $r;
         }
 
+        $items = [$model->toArray()];
+        $this->model->relationsToObjects($items);
+
         return CrudJsonResponse::successful([
             'action' => __FUNCTION__,
-            'items' => [$model],
+            'items' => $items,
         ]);
     }
 
@@ -627,6 +617,9 @@ abstract class CrudHandler
             ]);
         }
 
+        $this->model->relationsFromObjects($old);
+        $this->model->relationsFromObjects($delta);
+
         $items = [];
         for ($i = 0; $i < count($delta); $i++) {
             $items[$i] = [
@@ -664,8 +657,8 @@ abstract class CrudHandler
             }
 
             $dirty = [];
-            foreach ($old as $fieldName => $fieldValue) {
-                if ($model->{$fieldName} != $fieldValue) {
+            foreach (array_keys($delta) as $fieldName) {
+                if ($model->{$fieldName} != $old[$fieldName]) {
                     $dirty[] = $fieldName;
                 }
             }
@@ -698,7 +691,9 @@ abstract class CrudHandler
 
             if ($dbOk == true and $afterOk === true) {
                 DB::commit();
-                $successful[] = $model;
+                $items = [$model->toArray()];
+                $this->model->relationsToObjects($items);
+                $successful[] = $items[0];
             } else {
                 DB::rollback();
                 $error[] = ($afterOk instanceof \Illuminate\Http\JsonResponse)
@@ -761,6 +756,8 @@ abstract class CrudHandler
         if (Arr::isAssoc($items)) {
             $items = [$items];
         }
+
+        $this->model->relationsFromObjects($items);
 
         $successful = [];
         $error = [];

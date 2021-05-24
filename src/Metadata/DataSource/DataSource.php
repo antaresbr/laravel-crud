@@ -28,6 +28,11 @@ class DataSource extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'model' => [
+                'type' => 'Antares\Crud\CrudModel',
+                'required' => false,
+                'nullable' => true,
+            ],
             'sourceKey' => [
                 'type' => 'string',
                 'required' => true,
@@ -76,6 +81,12 @@ class DataSource extends AbstractMetadata
         }
 
         if (!empty($data['type']) and $data['type'] == 'table') {
+            if (empty($data['sourceKey']) and !empty($data['model'])) {
+                $model = new $data['model']();
+                if (!empty($model->primaryKey)) {
+                    $data['sourceKey'] = $model->primaryKey;
+                }
+            }
             if (empty($data['sourceKey'])) {
                 $data['sourceKey'] = 'id';
             }

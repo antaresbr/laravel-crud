@@ -10,6 +10,7 @@ use Antares\Crud\Metadata\Layout\AbstractLayout;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Options;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class CrudModel extends Model
 {
@@ -71,14 +72,19 @@ class CrudModel extends Model
         if (empty($this->metadata)) {
             $this->metadata = $this->defaultMetadata();
 
-            $this->metadata['fields'] = ($opt->getFields === true) ? $this->getPropertiesListFromSource('fieldsMetadata', Field::class, 'name') : null;
-            $this->metadata['orders'] = ($opt->getOrders === true) ? $this->getPropertiesListFromSource('ordersMetadata', Order::class, 'field') : null;
-            $this->metadata['filters'] = ($opt->getFilters === true) ? $this->filtersMetadata($opt->filtersOptions) : null;
-            $this->metadata['grid'] = ($opt->getGrid === true) ? $this->gridMetadata($opt->gridOptions) : null;
-            $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getPropertiesListFromSource('layoutMetadata', AbstractLayout::class) : null;
+            $this->metadata['fields'] = ($opt->getFields === true) ? $this->getFieldsMetadata() : null;
+            $this->metadata['orders'] = ($opt->getOrders === true) ? $this->getOrdersMetadata() : null;
+            $this->metadata['filters'] = ($opt->getFilters === true) ? $this->getFiltersMetadata($opt->filtersOptions) : null;
+            $this->metadata['grid'] = ($opt->getGrid === true) ? $this->getGridMetadata($opt->gridOptions) : null;
+            $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getLayoutMetadata() : null;
 
-            if ($opt->getOrders === true and $this->metadata['orders'] == null and $this->getPropertiesListSource('ordersMetadata') === false and !empty($this->primaryKey)) {
-                $this->metadata['orders'] = Order::make(['field' => $this->primaryKey, 'type' => 'asc']);
+            if (
+                $opt->getOrders === true and
+                $this->metadata['orders'] == null and
+                $this->getPropertiesListSource('ordersMetadata') === false and
+                !empty($this->primaryKey)
+            ) {
+                $this->metadata['orders'] = [Order::make(['field' => $this->primaryKey, 'type' => 'asc'])];
             }
         }
 
@@ -187,12 +193,32 @@ class CrudModel extends Model
     }
 
     /**
+     * Get fields metadata
+     *
+     * @return array
+     */
+    public function getFieldsMetadata()
+    {
+        return $this->getPropertiesListFromSource('fieldsMetadata', Field::class, 'name');
+    }
+
+    /**
+     * Get orders metadata
+     *
+     * @return array
+     */
+    public function getOrdersMetadata()
+    {
+        return $this->getPropertiesListFromSource('ordersMetadata', Order::class, 'field');
+    }
+
+    /**
      * Get filters metadata
      *
      * @param array $options
      * @return array
      */
-    public function filtersMetadata(array $options = [])
+    public function getFiltersMetadata(array $options = [])
     {
         $opt = Options::make($options, [
             'getStatic' => ['type' => 'boolean', 'default' => true],
@@ -215,7 +241,7 @@ class CrudModel extends Model
      * @param array $options
      * @return array
      */
-    public function gridMetadata(array $options = [])
+    public function getGridMetadata(array $options = [])
     {
         $opt = Options::make($options, [
             'getFields' => ['type' => 'boolean', 'default' => true],
@@ -226,5 +252,127 @@ class CrudModel extends Model
         ];
 
         return $grid;
+    }
+
+    /**
+     * Get layout metadata
+     *
+     * @return array
+     */
+    public function getLayoutMetadata()
+    {
+        return $this->getPropertiesListFromSource('layoutMetadata', AbstractLayout::class);
+    }
+
+    /**
+     * Get picklists from fields
+     *
+     * @param array $picklists
+     * @param array $fields
+     * @return void
+     */
+    public function getPicklistsFromFields(array &$picklists, $fields)
+    {
+        if (!empty($fields)) {
+            foreach ($fields as $field) {
+                if ($field->dataSource and $field->dataSource->type == 'picklist') {
+                    $picklist = $field->dataSource->id;
+                    if (!in_array($picklist, $picklists)) {
+                        $picklists[$picklist] = picklists($picklist);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Get dataSource fields
+     *
+     * @param array $fields
+     * @return array
+     */
+    public function getDataSourceFields($fields = null)
+    {
+        $dsFields = [];
+
+        if ($fields === null) {
+            $fields = $this->getFieldsMetadata();
+        }
+
+        if (!empty($fields)) {
+            foreach ($fields as $field) {
+                if ($field->dataSource) {
+                    $dsFields[] = $field;
+                }
+            }
+        }
+
+        return $dsFields;
+    }
+
+    /**
+     * Convert relation fields to objects
+     *
+     * @param array $data
+     * @return void
+     */
+    public function relationsToObjects(&$data)
+    {
+        if (!empty($data)) {
+            $fields = $this->getDataSourceFields();
+            $selectFields = [];
+
+            foreach ($data as &$item) {
+                foreach ($fields as $field) {
+                    if (isset($item[$field['name']]) and $item[$field['name']] !== null) {
+                        if (!is_object($item[$field['name']]) and !is_array($item[$field['name']])) {
+                            if ($field['dataSource']['type'] == 'picklist') {
+                                $item[$field['name']] = picklists($field['dataSource']['id'])->getItem($item[$field['name']]);
+                            }
+                            if ($field['dataSource']['type'] == 'table') {
+                                if (empty($selectFields[$field['name']])) {
+                                    $selectFields[$field['name']] = [$field['dataSource']['sourceKey']];
+                                    foreach ($field['dataSource']['showFields'] as $key => $value) {
+                                        $selectFields[$field['name']][] = $key;
+                                    }
+                                }
+                                $query = DB::table($field['dataSource']['id'])->where($field['dataSource']['sourceKey'], $item[$field['name']]);
+                                $query->select($selectFields[$field['name']]);
+                                $query->where($field['dataSource']['sourceKey'], $item[$field['name']]);
+                                $item[$field['name']] = $query->get()->first();
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Convert relation fields to objects
+     *
+     * @param array $data
+     * @return void
+     */
+    public function relationsFromObjects(&$data)
+    {
+        if (!empty($data)) {
+            $fields = $this->getDataSourceFields();
+
+            foreach ($data as &$item) {
+                foreach ($fields as $field) {
+                    if (isset($item[$field['name']]) and $item[$field['name']] !== null) {
+                        if (is_object($item[$field['name']]) or is_array($item[$field['name']])) {
+                            if ($field['dataSource']['type'] == 'picklist') {
+                                $item[$field['name']] = $item[$field['name']]['key'];
+                            }
+                            if ($field['dataSource']['type'] == 'table') {
+                                $item[$field['name']] = $item[$field['name']][$field['dataSource']['sourceKey']];
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
