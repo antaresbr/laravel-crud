@@ -42,5 +42,7 @@ class Field extends AbstractLayout
         if (!array_key_exists('field', $data) and array_key_exists('name', $data)) {
             $data['field'] = $data['name'];
         }
+
+        parent::customDefaults($data);
     }
 }

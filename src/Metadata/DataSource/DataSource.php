@@ -58,6 +58,11 @@ class DataSource extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'frame' => [
+                'type' => 'Antares\Crud\Metadata\Frame',
+                'required' => false,
+                'nullable' => true,
+            ],
         ];
     }
 
@@ -94,6 +99,8 @@ class DataSource extends AbstractMetadata
                 $data['api'] = $data['id'];
             }
         }
+
+        parent::customDefaults($data);
     }
 
     /**

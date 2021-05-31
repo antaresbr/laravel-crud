@@ -155,7 +155,11 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
      */
     protected function customDefaults(array &$data)
     {
-        //-- To be implemented in descendent classes, if so.
+        foreach ($this->prototype() as $key => $props) {
+            if (isset($props['default']) and !isset($data[$key])) {
+                $data[$key] = $props['default'];
+            }
+        }
     }
 
     /**
