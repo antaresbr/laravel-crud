@@ -23,6 +23,7 @@ class CrudModel extends Model
     {
         return [
             'table' => $this->table,
+            'primaryKey' => !empty($this->primaryKey) ? $this->primaryKey : null,
             'filters' => [
                 'static' => null,
                 'custom' => null,
