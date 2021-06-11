@@ -225,15 +225,27 @@ class CrudModel extends Model
             'getStatic' => ['type' => 'boolean', 'default' => true],
             'getCustom' => ['type' => 'boolean', 'default' => true],
             'getFields' => ['type' => 'boolean', 'default' => true],
+            'getLayout' => ['type' => 'boolean', 'default' => true],
         ])->validate();
 
         $filters = [
             'static' => ($opt->getStatic === true) ? $this->getPropertiesListFromSource('filtersStaticMetadata', Filter::class) : null,
             'custom' => ($opt->getCustom === true) ? $this->getPropertiesListFromSource('filtersCustomMetadata', Filter::class) : null,
             'fields' => ($opt->getFields === true) ? $this->getPropertiesListFromSource('filtersFieldsMetadata', FieldProperties::class) : null,
+            'layout' => ($opt->getLayout === true) ? $this->getFiltersLayoutMetadata() : null,
         ];
 
         return $filters;
+    }
+
+    /**
+     * Get filters layout metadata
+     *
+     * @return array
+     */
+    public function getFiltersLayoutMetadata()
+    {
+        return $this->getPropertiesListFromSource('filtersLayoutMetadata', AbstractLayout::class);
     }
 
     /**
@@ -246,25 +258,13 @@ class CrudModel extends Model
     {
         $opt = Options::make($options, [
             'getFields' => ['type' => 'boolean', 'default' => true],
-            'getLayout' => ['type' => 'boolean', 'default' => true],
         ])->validate();
 
         $grid = [
             'fields' => ($opt->getFields === true) ? $this->getPropertiesListFromSource('gridFieldsMetadata', GridFieldProperties::class) : null,
-            'layout' => ($opt->getLayout === true) ? $this->getGridLayoutMetadata() : null,
         ];
 
         return $grid;
-    }
-
-    /**
-     * Get grid layout metadata
-     *
-     * @return array
-     */
-    public function getGridLayoutMetadata()
-    {
-        return $this->getPropertiesListFromSource('gridLayoutMetadata', AbstractLayout::class);
     }
 
     /**
