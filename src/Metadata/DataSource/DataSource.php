@@ -29,7 +29,7 @@ class DataSource extends AbstractMetadata
                 'nullable' => true,
             ],
             'model' => [
-                'type' => 'Antares\Crud\CrudModel',
+                'type' => 'boolean|Antares\Crud\CrudModel',
                 'required' => false,
                 'nullable' => true,
             ],
@@ -91,9 +91,9 @@ class DataSource extends AbstractMetadata
         }
 
         if (!empty($data['type']) and $data['type'] == 'table') {
-            if (empty($data['sourceKey']) and !empty($data['model'])) {
+            if (!empty($data['model'])) {
                 $model = new $data['model']();
-                if (!empty($model->primaryKey)) {
+                if (empty($data['sourceKey']) and !empty($model->primaryKey)) {
                     $data['sourceKey'] = $model->primaryKey;
                 }
             }

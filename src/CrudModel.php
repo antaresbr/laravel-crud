@@ -246,13 +246,25 @@ class CrudModel extends Model
     {
         $opt = Options::make($options, [
             'getFields' => ['type' => 'boolean', 'default' => true],
+            'getLayout' => ['type' => 'boolean', 'default' => true],
         ])->validate();
 
         $grid = [
             'fields' => ($opt->getFields === true) ? $this->getPropertiesListFromSource('gridFieldsMetadata', GridFieldProperties::class) : null,
+            'layout' => ($opt->getLayout === true) ? $this->getGridLayoutMetadata() : null,
         ];
 
         return $grid;
+    }
+
+    /**
+     * Get grid layout metadata
+     *
+     * @return array
+     */
+    public function getGridLayoutMetadata()
+    {
+        return $this->getPropertiesListFromSource('gridLayoutMetadata', AbstractLayout::class);
     }
 
     /**

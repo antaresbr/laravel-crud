@@ -38,6 +38,10 @@ class TableDataSource extends DataSource
                     ];
                 }
 
+                if (!isset($meta['metadata']) or $meta['metadata'] === true or $meta['metadata'] === null) {
+                    $meta['metadata'] = $model->metadata(['getLayout' => false]);
+                }
+
                 $data = array_merge($meta, $data);
             }
 
