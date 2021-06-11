@@ -38,6 +38,11 @@ class DataSource extends AbstractMetadata
                 'required' => true,
                 'nullable' => false,
             ],
+            'metadata' => [
+                'type' => 'array',
+                'required' => false,
+                'nullable' => true,
+            ],
             'api' => [
                 'type' => 'string',
                 'required' => false,
