@@ -109,11 +109,11 @@ class DataSource extends AbstractMetadata
     }
 
     /**
-     * @see AbstractMetadata::customValidates()
+     * @see AbstractMetadata::customValidations()
      *
      * @return void
      */
-    protected function customValidates()
+    protected function customValidations()
     {
         //--[ showFields ]--
 

@@ -20,11 +20,11 @@ class TabGroup extends AbstractContainer
     }
 
     /**
-     * @see AbstractMetadata::customValidates()
+     * @see AbstractMetadata::customValidations()
      *
      * @return void
      */
-    protected function customValidates()
+    protected function customValidations()
     {
         $children = $this->children;
         if (!empty($children)) {

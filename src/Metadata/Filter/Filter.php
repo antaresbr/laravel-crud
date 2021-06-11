@@ -50,9 +50,9 @@ class Filter extends AbstractMetadata
     }
 
     /**
-     * @see AbstractMetadata::customValidates()
+     * @see AbstractMetadata::customValidations()
      */
-    protected function customValidates()
+    protected function customValidations()
     {
         if (empty($this->filters) and empty($this->column)) {
             throw FilterException::forPropertyNotSupplied('[ column | filters ]');

@@ -157,11 +157,11 @@ abstract class AbstractField extends AbstractMetadata
     }
 
     /**
-     * @see AbstractMetadata::customValidates()
+     * @see AbstractMetadata::customValidations()
      *
      * @return void
      */
-    protected function customValidates()
+    protected function customValidations()
     {
         if (is_array($this->dataSource)) {
             $this->dataSource = DataSource::make($this->dataSource);

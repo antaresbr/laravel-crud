@@ -144,7 +144,7 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
 
         $this->options = Options::make($data, $this->prototype())->validate();
 
-        $this->customValidates();
+        $this->customValidations();
     }
 
     /**
@@ -167,7 +167,7 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
      *
      * @return void
      */
-    protected function customValidates()
+    protected function customValidations()
     {
         //-- To be implemented in descendent classes, if so.
     }
