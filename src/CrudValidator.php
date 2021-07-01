@@ -5,6 +5,7 @@ namespace Antares\Crud;
 use Antares\Crud\Ruler\CrudRuler;
 use Antares\Support\Options;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\MessageBag;
 
 class CrudValidator
 {
@@ -170,7 +171,7 @@ class CrudValidator
      */
     public function errors()
     {
-        return $this->validator() ? $this->validator()->errors() : [];
+        return $this->validator() ? $this->validator()->errors()->toArray() : [];
     }
 
     /**

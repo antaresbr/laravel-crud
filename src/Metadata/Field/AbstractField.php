@@ -54,6 +54,12 @@ abstract class AbstractField extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'letterCase' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+                'values' => ['upper', 'lower', 'sentence', 'capitalized'],
+            ],
             'uic' => [
                 'type' => 'string',
                 'required' => false,

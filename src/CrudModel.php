@@ -196,11 +196,22 @@ class CrudModel extends Model
     /**
      * Get fields metadata
      *
+     * @param bool $asAssoc Flag to return metadata as associative array
      * @return array
      */
-    public function getFieldsMetadata()
+    public function getFieldsMetadata(bool $asAssoc = false)
     {
-        return $this->getPropertiesListFromSource('fieldsMetadata', Field::class, 'name');
+        $metadata = $this->getPropertiesListFromSource('fieldsMetadata', Field::class, 'name');
+
+        if ($asAssoc === true) {
+            $assoc = [];
+            foreach ($metadata as $field) {
+                $assoc[$field['name']] = $field;
+            }
+            return $assoc;
+        }
+
+        return $metadata;
     }
 
     /**
@@ -387,5 +398,72 @@ class CrudModel extends Model
                 }
             }
         }
+    }
+
+    /**
+     * Apply fieldsMetadata properties on data
+     *
+     * @param  array $data
+     * @return void
+     */
+    public function applyFieldsMetadataPropertiesOnData(array &$data)
+    {
+        if (empty($data)) {
+            return;
+        }
+
+        $metadata = $this->getFieldsMetadata(true);
+
+        foreach($data as &$item) {
+            foreach(array_keys($item) as $key) {
+                if (array_key_exists($key, $metadata)) {
+                    //-- letterCase
+                    if (!empty($metadata[$key]['letterCase'])) {
+                        switch ($metadata[$key]['letterCase']) {
+                            case 'upper':
+                                $item[$key] = mb_strtoupper($item[$key]);
+                                break;
+                            case 'lower':
+                                $item[$key] = mb_strtolower($item[$key]);
+                                break;
+                            case 'sentence':
+                                $item[$key] = mb_strtoupper(mb_substr($item[$key], 0, 1)) . mb_strtolower(mb_substr($item[$key], 1));
+                                break;
+                            case 'capitalized':
+                                $item[$key] = mb_convert_case($item[$key], MB_CASE_TITLE);
+                                break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Translate the field names in error messages
+     *
+     * @param  array $data
+     * @return array
+     */
+    public function translateFieldnamesInErrors($data)
+    {
+        if (empty($data)) {
+            return $data;
+        }
+
+        $metadata = $this->getFieldsMetadata(true);
+
+        $translated = [];
+        foreach($data as $fieldName => $errors) {
+            if (!empty($metadata[$fieldName]['label'])) {
+                $label = $metadata[$fieldName]['label'];
+                foreach($errors as &$error) {
+                    $error = str_replace($fieldName, $label . ' ['. $fieldName . ']', $error);
+                }
+            }
+            $translated[$fieldName] = $errors;
+        }
+
+        return $translated;
     }
 }

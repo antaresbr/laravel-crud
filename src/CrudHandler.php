@@ -67,7 +67,7 @@ abstract class CrudHandler
                 return CrudJsonResponse::error(CrudHttpErrors::DATA_VALIDATION_ERROR, null, [
                     'action' => $action,
                     'parent_action' => $parentAction,
-                    'errors' => $this->validator->errors(),
+                    'errors' => $this->model->translateFieldnamesInErrors($this->validator->errors()),
                     'source' => $data,
                 ]);
             }
@@ -441,6 +441,7 @@ abstract class CrudHandler
         }
 
         $this->model->relationsFromObjects($items);
+        $this->model->applyFieldsMetadataPropertiesOnData($items);
 
         $modelClass = get_class($this->model);
         $keyName = $this->model->getKeyName();
@@ -618,6 +619,7 @@ abstract class CrudHandler
 
         $this->model->relationsFromObjects($old);
         $this->model->relationsFromObjects($delta);
+        $this->model->applyFieldsMetadataPropertiesOnData($delta);
 
         $items = [];
         for ($i = 0; $i < count($delta); $i++) {
@@ -637,6 +639,14 @@ abstract class CrudHandler
         foreach ($items as $item) {
             $old = $this->attributesFromData($item['old']);
             $delta = $this->attributesFromData($item['delta']);
+
+            $realDelta = [];
+            foreach($delta as $key => $value) {
+                if ($value !== $old[$key]) {
+                    $realDelta[$key] = $value;
+                }
+            }
+            $delta = $realDelta;
 
             if (!Arr::has($old, $keyName)) {
                 $error[] = CrudJsonResponse::error(CrudHttpErrors::NO_PRIMARY_KEY_SUPPLIED, null, $old)->getData();
