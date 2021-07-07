@@ -7,6 +7,7 @@ use Antares\Crud\Http\CrudJsonResponse;
 use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Arr;
+use Antares\Support\Options;
 use Antares\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -43,6 +44,81 @@ abstract class CrudHandler
      * @var \Antares\Crud\CrudModel
      */
     protected $model;
+
+    /**
+     * Errors bag
+     *
+     * @var \Antares\Crud\CrudMessageBag
+     */
+    private $errors;
+
+    /**
+     * Errors bag access
+     *
+     * @return \Antares\Crud\CrudMessageBag
+     */
+    public function errors()
+    {
+        if (!$this->errors) {
+            $this->errors = new CrudMessageBag();
+        }
+        return $this->errors;
+    }
+
+    /**
+     * Return a JsonResponse with error based on errors bag or true if no error in errors bag
+     *
+     * @param array $options
+     * @return bool|\Illuminate\Http\JsonResponse
+     */
+    public function errorResponseOrTrue(array $options = [])
+    {
+        if ($this->errors->isEmpty()) {
+            return true;
+        }
+
+        $opt = Options::make($options, [
+            'error' => ['type' => 'array', 'nullable' => true],
+            'code' => ['type' => 'integer', 'nullable' => true],
+            'message' => ['type' => 'string', 'nullable' => true],
+            'action' => ['type' => 'string', 'nullable' => true],
+            'parent_action' => ['type' => 'string', 'nullable' => true],
+            'source' => ['type' => 'mixed', 'nullable' => true],
+            'data' => ['type' => 'array', 'nullable' => false, 'default' => []],
+            'httpStatus' => ['type' => 'integer', 'nullable' => true],
+            'clearAfterUse' => ['type' => 'boolean', 'default' => true],
+        ])->validate();
+
+        if ($opt->has('error') and !$opt->has('code')) {
+            $opt->code = $opt->error['code'];
+        }
+        if ($opt->has('error') and !$opt->has('message')) {
+            $opt->message = $opt->error['message'];
+        }
+
+        $data = $opt->data;
+        if ($opt->has('action')) {
+            $data['action'] = $opt->action;
+        }
+        if ($opt->has('parent_action')) {
+            $data['parent_action'] = $opt->parent_action;
+        }
+        if ($opt->has('source')) {
+            $data['source'] = $opt->source;
+        }
+        $data['errors'] = $this->errors()->get('*');
+
+        if ($opt->clearAfterUse === true) {
+            $this->errors()->clear();
+        }
+        
+        return CrudJsonResponse::error(
+            $opt->code,
+            $opt->message,
+            $data,
+            $opt->httpStatus
+        );
+    }
 
     /**
      * Crud validador for this handler
