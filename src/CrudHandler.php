@@ -73,7 +73,7 @@ abstract class CrudHandler
      */
     public function errorResponseOrTrue(array $options = [])
     {
-        if ($this->errors->isEmpty()) {
+        if ($this->errors()->isEmpty()) {
             return true;
         }
 
