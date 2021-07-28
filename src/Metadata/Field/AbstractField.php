@@ -147,6 +147,7 @@ abstract class AbstractField extends AbstractMetadata
         return [
             'checkbox',
             'date',
+            'file',
             'image',
             'number',
             'password',
