@@ -455,7 +455,7 @@ abstract class CrudHandler
         $perPage = Arr::get($metadata, 'pagination.perPage', 0);
 
         $resource = ($perPage > 0) ? $query->paginate($perPage) : $query->get();
-
+        
         $items = ($resource instanceof AbstractPaginator) ? $resource->items() : $resource->toArray();
         $metadata['pagination'] = CrudPagination::make($resource)->toArray();
 
@@ -626,7 +626,7 @@ abstract class CrudHandler
             return $r;
         }
 
-        $items = [$model->toArray()];
+        $items = [$model];
         $this->model->relationsToObjects($items);
 
         return CrudJsonResponse::successful([
@@ -776,7 +776,7 @@ abstract class CrudHandler
 
             if ($dbOk == true and $afterOk === true) {
                 DB::commit();
-                $items = [$model->toArray()];
+                $items = [$model];
                 $this->model->relationsToObjects($items);
                 $successful[] = $items[0];
             } else {

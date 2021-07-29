@@ -8,6 +8,7 @@ use Antares\Crud\Metadata\Field\GridFieldProperties;
 use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Crud\Metadata\Layout\AbstractLayout;
 use Antares\Crud\Metadata\Order\Order;
+use Antares\Support\Arr;
 use Antares\Support\Options;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -315,7 +316,7 @@ class CrudModel extends Model
      * @param array $fields
      * @return array
      */
-    public function getDataSourceFields($fields = null)
+    public function getDataSourceFields($fields = null, $selectFields = null)
     {
         $dsFields = [];
 
@@ -326,7 +327,9 @@ class CrudModel extends Model
         if (!empty($fields)) {
             foreach ($fields as $field) {
                 if ($field->dataSource) {
-                    $dsFields[] = $field;
+                    if ($selectFields == null or array_key_exists($field->name, $selectFields)) {
+                        $dsFields[] = $field;
+                    }
                 }
             }
         }
@@ -335,40 +338,113 @@ class CrudModel extends Model
     }
 
     /**
-     * Convert relation fields to objects
+     * Get datasource fields relations
      *
-     * @param array $data
+     * @param array $fields
+     * @param array $selectFields
+     * @return array
+     */
+    public function getDatasourceFieldsRelations($fields = null, $selectFields = null)
+    {
+        $relations = [];
+
+        $dsFields = $this->getDataSourceFields($fields, $selectFields);
+        if (empty($dsFields)) {
+            return $relations;
+        }
+
+        foreach($dsFields as $field) {
+            $fieldName = $field['name'];
+            if (isset($relations[$fieldName])) {
+                continue;
+            }
+            $relation = [
+                'type' => $field['dataSource']['type'],
+                'id' => $field['dataSource']['id'],
+            ];
+            if ($field['dataSource']['type'] == 'table') {
+                $relation['relations'] = [];
+            }
+            if ($field['dataSource']['type'] == 'table') {
+                $relation['sourceKey'] = $field['dataSource']['sourceKey'];
+                $relation['selectFields'] = [$field['dataSource']['sourceKey'] => []];
+                if ($selectFields != null) {
+                    foreach ($selectFields[$fieldName] as $key => $value) {
+                        $relation['selectFields'] = Arr::add($relation['selectFields'], $key, []);
+                    }
+                }
+                else {
+                    foreach ($field['dataSource']['showFields'] as $key => $value) {
+                        $relation['selectFields'] = Arr::add($relation['selectFields'], $key, []);
+                    }
+                    foreach ($field['dataSource']['optionFields'] as $key => $value) {
+                        $relation['selectFields'] = Arr::add($relation['selectFields'], $key, []);
+                    }
+                }
+                if (!empty($field['dataSource']['metadata']['fields'])) {
+                    $relation['relations'] = $this->getDatasourceFieldsRelations($field['dataSource']['metadata']['fields'], $relation['selectFields']);
+                }
+            }
+            $relations[$fieldName] = $relation;
+        }
+
+        return $relations;
+    }
+
+    /**
+     * Item object relations
+     *
+     * @param array|stcClass|Model $item
+     * @param array $relations
      * @return void
      */
-    public function relationsToObjects(&$data)
+    private function relationsToObjects_item(&$item, $relations)
     {
-        if (!empty($data)) {
-            $fields = $this->getDataSourceFields();
-            $selectFields = [];
-
-            foreach ($data as &$item) {
-                foreach ($fields as $field) {
-                    if (isset($item[$field['name']]) and $item[$field['name']] !== null) {
-                        if (!is_object($item[$field['name']]) and !is_array($item[$field['name']])) {
-                            if ($field['dataSource']['type'] == 'picklist') {
-                                $item[$field['name']] = picklists($field['dataSource']['id'])->getItem($item[$field['name']]);
-                            }
-                            if ($field['dataSource']['type'] == 'table') {
-                                if (empty($selectFields[$field['name']])) {
-                                    $selectFields[$field['name']] = [$field['dataSource']['sourceKey']];
-                                    foreach ($field['dataSource']['showFields'] as $key => $value) {
-                                        $selectFields[$field['name']][] = $key;
-                                    }
-                                }
-                                $query = DB::table($field['dataSource']['id'])->where($field['dataSource']['sourceKey'], $item[$field['name']]);
-                                $query->select($selectFields[$field['name']]);
-                                $query->where($field['dataSource']['sourceKey'], $item[$field['name']]);
-                                $item[$field['name']] = $query->get()->first();
-                            }
+        if ($item and is_array($item)) {
+            $item = (object) $item;
+        }
+        foreach ($relations as $fieldName => $relation) {
+            if (isset($item->{$fieldName}) and $item->{$fieldName} !== null) {
+                if (!is_object($item->{$fieldName}) and !is_array($item->{$fieldName})) {
+                    if ($relation['type'] == 'picklist') {
+                        $item->{$fieldName} = picklists($relation['id'])->getItem($item->{$fieldName});
+                    }
+                    if ($relation['type'] == 'table') {
+                        $query = DB::table($relation['id'])->where($relation['sourceKey'], $item->{$fieldName});
+                        $query->select(array_keys($relation['selectFields']));
+                        $query->where($relation['sourceKey'], $item->{$fieldName});
+                        
+                        $item->{$fieldName} = $query->get()->first();
+                        
+                        if ($item->{$fieldName} and !empty($relation['relations'])) {
+                            $this->relationsToObjects_item($item->{$fieldName}, $relation['relations']);
                         }
                     }
                 }
             }
+        }
+
+    }
+
+    /**
+     * Convert relation fields to objects
+     *
+     * @param array $data
+     * @param array $metadata
+     * @return void
+     */
+    public function relationsToObjects(&$data)
+    {
+        $relations = [];
+        if (!empty($data)) {
+            $relations = $this->getDatasourceFieldsRelations();
+        }
+        if (empty($data) or empty($relations)) {
+            return;
+        }
+
+        foreach ($data as &$item) {
+            $this->relationsToObjects_item($item, $relations);
         }
     }
 
