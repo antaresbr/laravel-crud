@@ -48,4 +48,31 @@ class CrudException extends Exception
         }
         return new static("Invalid field assign '{$assign}'.");
     }
+
+    /**
+     * Create a new exception for invalid detail bond
+     *
+     * @param mixed $bond
+     * @return static
+     */
+    public static function forInvalidDetailBond($bond)
+    {
+        if (!is_string($bond)) {
+            $bond = print_r($bond, true);
+        }
+        return new static("Invalid detail bond '{$bond}'.");
+    }
+
+    /**
+     * Create a new exception for differe
+     *
+     * @param mixed $bond
+     * @return static
+     */
+    public static function forDifferentArrayLengths($array1, $array2)
+    {
+        $data1 = print_r($array1, true);
+        $data2 = print_r($array2, true);
+        return new static("Different array lengths: '{$data1}' and {$data2}.");
+    }
 }

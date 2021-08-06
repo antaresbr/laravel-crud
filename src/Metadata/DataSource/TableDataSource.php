@@ -33,7 +33,7 @@ class TableDataSource extends DataSource
                     $meta = $model->asDataSourceMetadata;
                 } else {
                     $meta = [
-                        'id' => $model->table,
+                        'id' => $model->getTable(),
                         'sourceKey' => $model->primaryKey,
                     ];
                 }

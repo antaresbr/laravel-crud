@@ -324,10 +324,11 @@ abstract class CrudHandler
     protected function &indexGetMetadata(Request $request)
     {
         $metadata = &$this->model->metadata([
-            'filtersOptions' => ['getFields' => false],
+            'filtersOptions' => ['getFields' => false, 'getLayout' => false],
             'getFields' => false,
             'getGrid' => false,
             'getLayout' => false,
+            'getDetails' => false,
         ]);
 
         $filters = $request->input('data.metadata.filters.custom');

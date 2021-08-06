@@ -2,6 +2,7 @@
 
 namespace Antares\Crud;
 
+use Antares\Crud\Metadata\Detail\Detail;
 use Antares\Crud\Metadata\Field\Field;
 use Antares\Crud\Metadata\Field\FieldProperties;
 use Antares\Crud\Metadata\Field\GridFieldProperties;
@@ -38,6 +39,7 @@ class CrudModel extends Model
             'fields' => null,
             'picklists' => null,
             'rules' => null,
+            'details' => null,
         ];
     }
 
@@ -65,6 +67,7 @@ class CrudModel extends Model
             'getGrid' => ['type' => 'boolean', 'default' => true],
             'gridOptions' => ['type' => 'array', 'default' => []],
             'getLayout' => ['type' => 'boolean', 'default' => true],
+            'getDetails' => ['type' => 'boolean', 'default' => true],
         ])->validate();
 
         if ($opt->reset) {
@@ -79,6 +82,7 @@ class CrudModel extends Model
             $this->metadata['filters'] = ($opt->getFilters === true) ? $this->getFiltersMetadata($opt->filtersOptions) : null;
             $this->metadata['grid'] = ($opt->getGrid === true) ? $this->getGridMetadata($opt->gridOptions) : null;
             $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getLayoutMetadata() : null;
+            $this->metadata['details'] = ($opt->getDetails === true) ? $this->getDetailsMetadata() : null;
 
             if (
                 $opt->getOrders === true and
@@ -287,6 +291,16 @@ class CrudModel extends Model
     public function getLayoutMetadata()
     {
         return $this->getPropertiesListFromSource('layoutMetadata', AbstractLayout::class);
+    }
+
+    /**
+     * Get details metadata
+     *
+     * @return array
+     */
+    public function getDetailsMetadata()
+    {
+        return $this->getPropertiesListFromSource('detailsMetadata', Detail::class);
     }
 
     /**
