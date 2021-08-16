@@ -131,15 +131,16 @@ abstract class CrudHandler
      * Validate some data for the supplied action
      *
      * @param array $data
+     * @param array $oldData
      * @param string $action
      * @param string $parentAction
-     * @param array $pkOptions
+     * @param array $options
      * @return bool|\Illuminate\Http\JsonResponse
      */
-    public function validateData($data, $action, $parentAction = null, $pkOptions = [])
+    public function validateData($data, $oldData, $action, $parentAction = null, $options = [])
     {
         if ($this->validator) {
-            if (!$this->validator->validate($action, $data, $pkOptions)) {
+            if (!$this->validator->validate($action, $data, $oldData, $options)) {
                 return CrudJsonResponse::error(CrudHttpErrors::DATA_VALIDATION_ERROR, null, [
                     'action' => $action,
                     'parent_action' => $parentAction,
@@ -200,16 +201,6 @@ abstract class CrudHandler
     }
 
     /**
-     * Get pkOtions for get model by primary key method
-     *
-     * @return array
-     */
-    public function getModelByPrimaryKey_pkOptions()
-    {
-        return ['includeUniqueRule' => false];
-    }
-
-    /**
      * Get model from request primary key
      *
      * @param string $action
@@ -240,7 +231,7 @@ abstract class CrudHandler
 
         $data = [$keyName => $keyValue];
 
-        $r = $this->validateData($data, 'primaryKey', $action, $this->getModelByPrimaryKey_pkOptions());
+        $r = $this->validateData($data, null, 'primaryKey', $action, [$keyName => ['includeUniqueRules' => false]]);
         if ($r !== true) {
             return $r;
         }
@@ -286,7 +277,7 @@ abstract class CrudHandler
 
         $metadata['picklists'] = $picklists;
         $metadata['rules'] = $rules;
-
+        
         return CrudJsonResponse::successful([
             'action' => __FUNCTION__,
             'metadata' => $metadata,
@@ -531,7 +522,7 @@ abstract class CrudHandler
 
             $r = $this->beforeStore($data);
             if ($r === true) {
-                $r = $this->validateData($data, __FUNCTION__);
+                $r = $this->validateData($data, null, __FUNCTION__);
             }
             if ($r !== true) {
                 $error[] = $r->getData();
@@ -757,7 +748,7 @@ abstract class CrudHandler
             }
 
             $data = array_merge($old, $delta);
-            $r = $this->validateData($data, __FUNCTION__, null, ['uniqueExceptId' => $old[$keyName]]);
+            $r = $this->validateData($data, $old, __FUNCTION__);
             if ($r !== true) {
                 $error[] = $r->getData();
                 continue;

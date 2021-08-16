@@ -46,6 +46,10 @@ class Filter extends AbstractMetadata
                 'values' => ['and', 'or'],
                 'default' => 'and',
             ],
+            'uuid' => [
+                'type' => 'string',
+                'default' => null,
+            ],
         ];
     }
 

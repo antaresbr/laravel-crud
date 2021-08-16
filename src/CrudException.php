@@ -36,6 +36,17 @@ class CrudException extends Exception
     }
 
     /**
+     * Create a new exception for invalid field name
+     *
+     * @param mixed $field
+     * @return static
+     */
+    public static function forInvalidFieldName($field)
+    {
+        return new static("Invalid field name '{$field}'.");
+    }
+
+    /**
      * Create a new exception for invalid field assign
      *
      * @param mixed $assign
