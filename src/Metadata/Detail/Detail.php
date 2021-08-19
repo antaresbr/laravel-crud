@@ -65,8 +65,13 @@ class Detail extends AbstractMetadata
         }
 
         
-        if (empty($data['table']) and $model) {
-            $data['table'] = $model->getTable();
+        if ($model) {
+            if (empty($data['table'])) {
+                $data['table'] = $model->getTable();
+            }
+            if (empty($data['api'])) {
+                $data['api'] = $model->getApi();
+            }
         }
         if (empty($data['api']) and !empty($data['table'])) {
             $data['api'] = $data['table'];

@@ -93,15 +93,18 @@ class DataSource extends AbstractMetadata
         if (!empty($data['type']) and $data['type'] == 'table') {
             if (!empty($data['model'])) {
                 $model = new $data['model']();
+                if (empty($data['api'])) {
+                    $data['api'] = $model->getApi();
+                }
                 if (empty($data['sourceKey']) and !empty($model->primaryKey)) {
                     $data['sourceKey'] = $model->primaryKey;
                 }
             }
-            if (empty($data['sourceKey'])) {
-                $data['sourceKey'] = 'id';
-            }
             if (empty($data['api']) and !empty($data['id'])) {
                 $data['api'] = $data['id'];
+            }
+            if (empty($data['sourceKey'])) {
+                $data['sourceKey'] = 'id';
             }
         }
 

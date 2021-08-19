@@ -17,6 +17,16 @@ use Illuminate\Support\Facades\DB;
 class CrudModel extends Model
 {
     /**
+     * Get api property, if any
+     *
+     * @return string
+     */
+    public function getApi()
+    {
+        return property_exists($this, 'api') ? $this->api : $this->getTable();
+    }
+
+    /**
      * Get default model metadata
      *
      * @return array
@@ -24,6 +34,7 @@ class CrudModel extends Model
     public function defaultMetadata()
     {
         return [
+            'api' => $this->getApi(),
             'table' => $this->table,
             'primaryKey' => !empty($this->primaryKey) ? $this->primaryKey : null,
             'filters' => [
