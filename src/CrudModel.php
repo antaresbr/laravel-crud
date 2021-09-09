@@ -541,6 +541,78 @@ class CrudModel extends Model
     }
 
     /**
+     * Prepare data to send
+     *
+     * @param  array $data
+     * @param  array $metadata
+     * @return void
+     */
+    public function prepareDataToSend(array &$data, $metadata = null)
+    {
+        if (empty($data)) {
+            return;
+        }
+
+        if (!is_array($metadata)) {
+            $metadata = $this->getFieldsMetadata(true);
+        }
+
+        foreach($data as &$item) {
+            if ($item instanceof static) {
+                $keys = array_keys($item->getAttributes());
+            } elseif (is_array($item)) {
+                $keys = array_keys($item);
+            } else {
+                $keys = [];
+            }
+            foreach($keys as $key) {
+                if (array_key_exists($key, $metadata)) {
+                    //-- blobs
+                    if ($metadata[$key]['type'] == 'blob') {
+                        $item[$key] = base64_encode($item[$key]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Prepare data to save
+     *
+     * @param  array $data
+     * @param  array $metadata
+     * @return void
+     */
+    public function prepareDataToSave(array &$data, $metadata = null)
+    {
+        if (empty($data)) {
+            return;
+        }
+
+        if (!is_array($metadata)) {
+            $metadata = $this->getFieldsMetadata(true);
+        }
+
+        foreach($data as &$item) {
+            if ($item instanceof static) {
+                $keys = array_keys($item->getAttributes());
+            } elseif (is_array($item)) {
+                $keys = array_keys($item);
+            } else {
+                $keys = [];
+            }
+            foreach($keys as $key) {
+                if (array_key_exists($key, $metadata)) {
+                    //-- blobs
+                    if ($metadata[$key]['type'] == 'blob') {
+                        $item[$key] = base64_decode($item[$key]);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
      * Translate the field names in error messages
      *
      * @param  array $data

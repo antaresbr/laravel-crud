@@ -452,6 +452,7 @@ abstract class CrudHandler
         $metadata['pagination'] = CrudPagination::make($resource)->toArray();
 
         $this->model->relationsToObjects($items);
+        $this->model->prepareDataToSend($items);
 
         $r = $this->afterIndex($items);
         if ($r !== true) {
@@ -508,6 +509,8 @@ abstract class CrudHandler
             $items = [$items];
         }
 
+        $metadata = $this->model->getFieldsMetadata(true);
+
         $this->model->relationsFromObjects($items);
         $this->model->applyFieldsMetadataPropertiesOnData($items);
 
@@ -530,6 +533,10 @@ abstract class CrudHandler
             }
 
             $model = new $modelClass();
+
+            $data = [$data];
+            $this->model->prepareDataToSave($data, $metadata);
+            $data = $data[0];
 
             $model->fill($data);
             if (Arr::has($data, $keyName)) {
@@ -558,6 +565,7 @@ abstract class CrudHandler
         }
 
         $this->model->relationsToObjects($successful);
+        $this->model->prepareDataToSend($successful, $metadata);
 
         $resultData = [
             'action' => __FUNCTION__,
@@ -620,6 +628,7 @@ abstract class CrudHandler
 
         $items = [$model];
         $this->model->relationsToObjects($items);
+        $this->model->prepareDataToSend($items);
 
         return CrudJsonResponse::successful([
             'action' => __FUNCTION__,
@@ -684,6 +693,8 @@ abstract class CrudHandler
                 'old' => $old,
             ]);
         }
+
+        $metadata = $this->model->getFieldsMetadata(true);
 
         $this->model->relationsFromObjects($old);
         $this->model->relationsFromObjects($delta);
@@ -754,6 +765,10 @@ abstract class CrudHandler
                 continue;
             }
 
+            $data = [$data];
+            $this->model->prepareDataToSave($data, $metadata);
+            $data = $data[0];
+
             $model->fill($data);
             $model->{$keyName} = $data[$keyName];
 
@@ -768,9 +783,7 @@ abstract class CrudHandler
 
             if ($dbOk == true and $afterOk === true) {
                 DB::commit();
-                $items = [$model];
-                $this->model->relationsToObjects($items);
-                $successful[] = $items[0];
+                $successful[] = $model;
             } else {
                 DB::rollback();
                 $error[] = ($afterOk instanceof \Illuminate\Http\JsonResponse)
@@ -779,6 +792,9 @@ abstract class CrudHandler
                 ;
             }
         }
+
+        $this->model->relationsToObjects($successful);
+        $this->model->prepareDataToSend($successful, $metadata);
 
         $resultData = [
             'action' => __FUNCTION__,
@@ -877,6 +893,9 @@ abstract class CrudHandler
                 ;
             }
         }
+
+        $this->model->relationsToObjects($successful);
+        $this->model->prepareDataToSend($successful);
 
         $resultData = [
             'action' => __FUNCTION__,
