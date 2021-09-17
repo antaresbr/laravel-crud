@@ -17,6 +17,9 @@ class CrudResourceRegistrar extends ResourceRegistrar
     {
         parent::__construct($router);
 
+        if (!in_array('search', $this->resourceDefaults)) {
+            array_unshift($this->resourceDefaults, 'search');
+        }
         if (!in_array('metadata', $this->resourceDefaults)) {
             array_unshift($this->resourceDefaults, 'metadata');
         }
@@ -27,6 +30,15 @@ class CrudResourceRegistrar extends ResourceRegistrar
         $uri = $this->getResourceUri($name) . '/_get-metadata_';
 
         $action = $this->getResourceAction($name, $controller, 'metadata', $options);
+
+        return $this->router->get($uri, $action);
+    }
+
+    protected function addResourceSearch($name, $base, $controller, $options)
+    {
+        $uri = $this->getResourceUri($name) . '/_search_';
+
+        $action = $this->getResourceAction($name, $controller, 'search', $options);
 
         return $this->router->get($uri, $action);
     }

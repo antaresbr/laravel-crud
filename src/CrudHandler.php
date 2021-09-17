@@ -285,6 +285,16 @@ abstract class CrudHandler
     }
 
     /**
+     * Crud search - index for datasources
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        return $this->index($request);
+    }
+
+    /**
      * Action executed before index action
      *
      * @param  array $metadata

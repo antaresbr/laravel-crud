@@ -63,6 +63,19 @@ class CrudController extends Controller
     }
 
     /**
+     * Crud search - index for datasourdes
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function search(Request $request)
+    {
+        if (($acl = $this->crudAuthorize(__FUNCTION__)) !== true) {
+            return $acl;
+        }
+        return $this->handler()->search($request);
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response

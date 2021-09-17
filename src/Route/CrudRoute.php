@@ -11,7 +11,7 @@ class CrudRoute
      *
      * @var array
      */
-    protected static $apiResourceDefaults = ['metadata', 'index', 'show', 'store', 'update', 'destroy'];
+    protected static $apiResourceDefaults = ['metadata', 'search', 'index', 'show', 'store', 'update', 'destroy'];
 
     /**
      * Route a resource to a controller.
