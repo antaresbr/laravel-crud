@@ -4,6 +4,7 @@ namespace Antares\Crud;
 
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Crud\Http\CrudJsonResponse;
+use Antares\Crud\Metadata\DataSource\TableDataSource;
 use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Arr;
@@ -255,33 +256,25 @@ abstract class CrudHandler
      */
     public function metadata(Request $request)
     {
-        $metadata = $this->model->metadata();
+        $data =  [ 'action' => __FUNCTION__ ];
 
-        $picklists = [];
-
-        if (!empty($metadata['fields'])) {
-            $this->model->getPicklistsFromFields($picklists, $metadata['fields']);
+        if ($request->boolean('data.asDataSource')) {
+            $data['asDataSource'] = TableDataSource::make(['model' => $this->model])->toArray();
+        } else {
+            $data['metadata'] = $this->model->metadata();
+            
+            $rules = [];
+            if ($this->validator) {
+                $rules['index'] = $this->validator->getRulesAsMetadata('index');
+                $rules['store'] = $this->validator->getRulesAsMetadata('store');
+                $rules['show'] = $this->validator->getRulesAsMetadata('show');
+                $rules['update'] = $this->validator->getRulesAsMetadata('update');
+                $rules['destroy'] = $this->validator->getRulesAsMetadata('destroy');
+            }
+            $data['metadata']['rules'] = $rules;
         }
-        if (!empty($metadata['filters']['fields'])) {
-            $this->model->getPicklistsFromFields($picklists, $metadata['filters']['fields']);
-        }
-
-        $rules = [];
-        if ($this->validator) {
-            $rules['index'] = $this->validator->getRulesAsMetadata('index');
-            $rules['store'] = $this->validator->getRulesAsMetadata('store');
-            $rules['show'] = $this->validator->getRulesAsMetadata('show');
-            $rules['update'] = $this->validator->getRulesAsMetadata('update');
-            $rules['destroy'] = $this->validator->getRulesAsMetadata('destroy');
-        }
-
-        $metadata['picklists'] = $picklists;
-        $metadata['rules'] = $rules;
         
-        return CrudJsonResponse::successful([
-            'action' => __FUNCTION__,
-            'metadata' => $metadata,
-        ]);
+        return CrudJsonResponse::successful($data);
     }
 
     /**
@@ -756,6 +749,12 @@ abstract class CrudHandler
 
             $dirty = [];
             foreach (array_keys($delta) as $fieldName) {
+                if (array_key_exists($fieldName, $metadata)) {
+                    //-- blobs
+                    if ($metadata[$fieldName]['type'] == 'blob') {
+                        continue;
+                    }
+                }
                 if ($model->{$fieldName} != $old[$fieldName]) {
                     $dirty[] = $fieldName;
                 }

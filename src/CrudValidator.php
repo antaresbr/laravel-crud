@@ -342,12 +342,6 @@ class CrudValidator
                 }
             }
 
-            if ($action != 'primaryKey') {
-                //dd('action', $action, 'data', $data);
-                //dd('action', $action, 'rules', $rules);
-                //dd('action', $action, 'options', $options, 'rules', $rules, 'data', $data, 'oldData', $oldData);
-            }
-
             $this->validator = Validator::make($data, $rules, $messages, $customAttributes);
             return $this->validator()->passes();
         }

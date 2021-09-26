@@ -38,5 +38,13 @@
         "psr-4": {
             "Antares\\Crud\\Tests\\": "tests/"
         }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Antares\\Crud\\Providers\\CrudConsoleServiceProvider",
+                "Antares\\Crud\\Providers\\CrudServiceProvider"
+            ]
+        }
     }
 }

@@ -23,20 +23,20 @@ class CrudHttpErrors extends AbstractHttpErrors
     public const TARGET_DATA_MODIFIED_BY_OTHERS = 991022;
 
     public const MESSAGES = [
-        self::MENUID_NOT_DEFINED => 'MenuId not defined',
-        self::ACTION_ERROR => 'Action error',
-        self::PARTIALLY_SUCCESSFUL => 'Partially successful',
-        self::ARRAY_LENGTHS_DIFFER => 'Array lengths differ',
-        self::NO_PRIMARY_KEY_SUPPLIED => 'No primary key supplied',
+        self::MENUID_NOT_DEFINED => 'crud::errors.menuid_not_defined',
+        self::ACTION_ERROR => 'crud::errors.ACTION_ERROR',
+        self::PARTIALLY_SUCCESSFUL => 'crud::errors.partially_successful',
+        self::ARRAY_LENGTHS_DIFFER => 'crud::errors.array_lengths_differ',
+        self::NO_PRIMARY_KEY_SUPPLIED => 'crud::errors.no_primary_key_supplied',
 
-        self::NO_DATA_SUPPLIED => 'No data supplied',
-        self::DATA_VALIDATION_ERROR => 'Data validation error',
-        self::DATA_MODEL_CREATE_FAIL => 'Data model creation error',
-        self::DATA_MODEL_QUERY_ERROR => 'Data model query error',
-        self::DATA_MODEL_UPDATE_FAIL => 'Data model update fail',
-        self::DATA_MODEL_DELETE_FAIL => 'Data model delete fail',
+        self::NO_DATA_SUPPLIED => 'crud::errors.no_data_supplied',
+        self::DATA_VALIDATION_ERROR => 'crud::errors.data_validation_error',
+        self::DATA_MODEL_CREATE_FAIL => 'crud::errors.data_model_create_fail',
+        self::DATA_MODEL_QUERY_ERROR => 'crud::errors.data_model_query_error',
+        self::DATA_MODEL_UPDATE_FAIL => 'crud::errors.data_model_update_fail',
+        self::DATA_MODEL_DELETE_FAIL => 'crud::errors.data_model_delete_fail',
 
-        self::TARGET_DATA_MODEL_NOT_FOUND => 'Target data model not found',
-        self::TARGET_DATA_MODIFIED_BY_OTHERS => 'Target data model was modified by others',
+        self::TARGET_DATA_MODEL_NOT_FOUND => 'crud::errors.target_data_model_not_found',
+        self::TARGET_DATA_MODIFIED_BY_OTHERS => 'crud::errors.target_data_modified_by_others',
     ];
 }

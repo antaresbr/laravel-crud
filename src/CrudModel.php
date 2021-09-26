@@ -8,6 +8,7 @@ use Antares\Crud\Metadata\Field\FieldProperties;
 use Antares\Crud\Metadata\Field\GridFieldProperties;
 use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Crud\Metadata\Layout\AbstractLayout;
+use Antares\Crud\Metadata\Menu;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Arr;
 use Antares\Support\Options;
@@ -47,6 +48,8 @@ class CrudModel extends Model
                 'perPage' => config('crud.model.metadata.pagination.perPage', 30),
             ],
             'grid' => null,
+            'layout' => null,
+            'menu' => null,
             'fields' => null,
             'picklists' => null,
             'rules' => null,
@@ -78,6 +81,8 @@ class CrudModel extends Model
             'getGrid' => ['type' => 'boolean', 'default' => true],
             'gridOptions' => ['type' => 'array', 'default' => []],
             'getLayout' => ['type' => 'boolean', 'default' => true],
+            'getMenu' => ['type' => 'boolean', 'default' => true],
+            'getPicklists' => ['type' => 'boolean', 'default' => true],
             'getDetails' => ['type' => 'boolean', 'default' => true],
         ])->validate();
 
@@ -93,8 +98,10 @@ class CrudModel extends Model
             $this->metadata['filters'] = ($opt->getFilters === true) ? $this->getFiltersMetadata($opt->filtersOptions) : null;
             $this->metadata['grid'] = ($opt->getGrid === true) ? $this->getGridMetadata($opt->gridOptions) : null;
             $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getLayoutMetadata() : null;
+            $this->metadata['menu'] = ($opt->getMenu === true) ? $this->getMenuMetadata() : null;
+            $this->metadata['picklists'] = ($opt->getPicklists === true) ? $this->getPicklistsMetadata() : null;
             $this->metadata['details'] = ($opt->getDetails === true) ? $this->getDetailsMetadata() : null;
-
+    
             if (
                 $opt->getOrders === true and
                 $this->metadata['orders'] == null and
@@ -305,6 +312,41 @@ class CrudModel extends Model
     }
 
     /**
+     * Get menu metadata
+     *
+     * @return array
+     */
+    public function getMenuMetadata()
+    {
+        $meta = $this->getPropertiesListSource('menuMetadata');
+
+        if (!empty($meta['items'])) {
+            $meta['items'] = $this->getPropertiesListFromSource($meta['items'], Menu::class);
+        }
+
+        return $meta;
+    }
+
+    /**
+     * Get picklists metadata
+     *
+     * @return array
+     */
+    public function getPicklistsMetadata()
+    {
+        $picklists = [];
+
+        if (!empty($this->metadata['fields'])) {
+            $this->getPicklistsFromFields($picklists, $this->metadata['fields']);
+        }
+        if (!empty($this->metadata['filters']['fields'])) {
+            $this->getPicklistsFromFields($picklists, $this->metadata['filters']['fields']);
+        }
+
+        return $picklists;
+    }
+
+    /**
      * Get details metadata
      *
      * @return array
@@ -312,6 +354,15 @@ class CrudModel extends Model
     public function getDetailsMetadata()
     {
         return $this->getPropertiesListFromSource('detailsMetadata', Detail::class);
+    }
+
+    /**
+     * Get model metadata as a data source
+     *
+     * @return array
+     */
+    public function asDataSourceMetadata() {
+        return property_exists($this, 'asDataSourceMetadata') ? $this->asDataSourceMetadata : [];
     }
 
     /**

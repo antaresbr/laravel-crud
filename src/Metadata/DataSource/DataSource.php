@@ -118,6 +118,8 @@ class DataSource extends AbstractMetadata
      */
     protected function customValidations()
     {
+        parent::customValidations();
+
         //--[ showFields ]--
 
         if (!empty($this->showFields) and is_string($this->showFields)) {
