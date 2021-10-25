@@ -29,6 +29,11 @@ class Detail extends AbstractMetadata
                 'required' => true,
                 'nullable' => false,
             ],
+            'menuPath' => [
+                'type' => 'string',
+                'required' => false,
+                'nullable' => true,
+            ],
             'title' => [
                 'type' => 'string',
                 'required' => false,

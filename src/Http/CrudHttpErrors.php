@@ -24,7 +24,7 @@ class CrudHttpErrors extends AbstractHttpErrors
 
     public const MESSAGES = [
         self::MENUID_NOT_DEFINED => 'crud::errors.menuid_not_defined',
-        self::ACTION_ERROR => 'crud::errors.ACTION_ERROR',
+        self::ACTION_ERROR => 'crud::errors.action_error',
         self::PARTIALLY_SUCCESSFUL => 'crud::errors.partially_successful',
         self::ARRAY_LENGTHS_DIFFER => 'crud::errors.array_lengths_differ',
         self::NO_PRIMARY_KEY_SUPPLIED => 'crud::errors.no_primary_key_supplied',
