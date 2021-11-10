@@ -2,6 +2,7 @@
 
 namespace Antares\Crud\Metadata\Field;
 
+use Antares\Crud\CrudException;
 use Antares\Crud\Metadata\AbstractMetadata;
 use Antares\Crud\Metadata\DataSource\DataSource;
 
@@ -85,6 +86,12 @@ abstract class AbstractField extends AbstractMetadata
                 'type' => 'string',
                 'required' => false,
                 'nullable' => true,
+            ],
+            'uicActionProperties' => [
+                'type' => 'array',
+                'required' => true,
+                'nullable' => false,
+                'default' => [],
             ],
             'dataSource' => [
                 'type' => 'array|Antares\Crud\Metadata\DataSource\DataSource',
@@ -170,6 +177,24 @@ abstract class AbstractField extends AbstractMetadata
      */
     protected function customValidations()
     {
+        //--[ uicActionProperties ]--
+        if (!is_array($this->uicActionProperties)) {
+            throw CrudException::forInvalidObjectType('array', $this->uicActionProperties);
+        } else {
+            $items = [];
+            foreach ($this->uicActionProperties as $item) {
+                if (is_array($item)) {
+                    $item = UicActionProperty::make($item);
+                }
+                if (!($item instanceof UicActionProperty)) {
+                    throw CrudException::forInvalidObjectType(UicActionProperty::class, $item);
+                }
+                $items[] = $item;
+            }
+            $this->uicActionProperties = $items;
+        }
+
+        //--[ datasource ]--
         if (is_array($this->dataSource)) {
             $this->dataSource = DataSource::make($this->dataSource);
         }
