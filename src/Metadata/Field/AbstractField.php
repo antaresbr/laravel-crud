@@ -87,8 +87,8 @@ abstract class AbstractField extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
-            'uicActionProperties' => [
-                'type' => 'array',
+            'uicProperties' => [
+                'type' => 'array|Antares\Crud\Metadata\Field\UicProperties',
                 'required' => true,
                 'nullable' => false,
                 'default' => [],
@@ -177,21 +177,11 @@ abstract class AbstractField extends AbstractMetadata
      */
     protected function customValidations()
     {
-        //--[ uicActionProperties ]--
-        if (!is_array($this->uicActionProperties)) {
-            throw CrudException::forInvalidObjectType('array', $this->uicActionProperties);
-        } else {
-            $items = [];
-            foreach ($this->uicActionProperties as $item) {
-                if (is_array($item)) {
-                    $item = UicActionProperty::make($item);
-                }
-                if (!($item instanceof UicActionProperty)) {
-                    throw CrudException::forInvalidObjectType(UicActionProperty::class, $item);
-                }
-                $items[] = $item;
-            }
-            $this->uicActionProperties = $items;
+        parent::customValidations();
+        
+        //--[ uicProperties ]--
+        if (is_array($this->uicProperties)) {
+            $this->uicProperties = UicProperties::make($this->uicProperties);
         }
 
         //--[ datasource ]--
