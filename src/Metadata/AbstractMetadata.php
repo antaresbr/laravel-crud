@@ -55,7 +55,7 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
      * @param  mixed  $key
      * @return bool
      */
-    public function offsetExists($key)
+    public function offsetExists($key): bool
     {
         return $this->options->offsetExists($key);
     }
@@ -78,7 +78,7 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
      * @param  mixed  $value
      * @return void
      */
-    public function offsetSet($key, $value)
+    public function offsetSet($key, $value): void
     {
         $this->options->offsetSet($key, $value);
     }
@@ -89,7 +89,7 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
      * @param  string  $key
      * @return void
      */
-    public function offsetUnset($key)
+    public function offsetUnset($key): void
     {
         $this->options->offsetUnset($key);
     }
@@ -99,9 +99,9 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
     /**
      * Get items count
      *
-     * @return integer
+     * @return int
      */
-    public function count()
+    public function count(): int
     {
         return $this->options->count();
     }
@@ -111,9 +111,9 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
     /**
      * Get itarator
      *
-     * @return ArrayItarator
+     * @return Traversable
      */
-    public function getIterator()
+    public function getIterator(): Traversable
     {
         return $this->options->getIterator();
     }

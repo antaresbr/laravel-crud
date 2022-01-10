@@ -284,7 +284,8 @@ abstract class CrudHandler
      */
     public function search(Request $request)
     {
-        return $this->index($request);
+        $request->request->add(['__search__' => true]);
+        return $this->doIndex($request);
     }
 
     /**
@@ -318,12 +319,14 @@ abstract class CrudHandler
     protected function &indexGetMetadata(Request $request)
     {
         $metadata = &$this->model->metadata([
-            'filtersOptions' => ['getFields' => false, 'getLayout' => false],
+            'filtersOptions' => ['getTemplate' => false, 'getFields' => false, 'getLayout' => false],
             'getFields' => false,
             'getGrid' => false,
             'getLayout' => false,
             'getDetails' => false,
         ]);
+
+        Arr::set($metadata, 'filters.ignoreStatic', $request->input('data.metadata.filters.ignoreStatic', false));
 
         $filters = $request->input('data.metadata.filters.custom');
         if (!empty($filters)) {
@@ -411,11 +414,22 @@ abstract class CrudHandler
     }
 
     /**
-     * Display a listing of the resource.
+     * Get a resource list.
      *
      * @return \Illuminate\Http\Response
      */
     public function index(Request $request)
+    {
+        $request->request->remove('__search__');
+        return $this->doIndex($request);
+    }
+
+    /**
+     * Do index action, getting a resource list.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function doIndex(Request $request)
     {
         $metadata = &$this->indexGetMetadata($request);
 
@@ -427,7 +441,12 @@ abstract class CrudHandler
         $query = $this->model->query();
 
         //-- filters
-        $this->indexQueryFilters($query, Arr::get($metadata, 'filters.static'));
+        if ($request->input('__search__', false) === true and $request->input('data.metadata.filters.ignoreStatic', false) === true) {
+            Arr::set($metadata, 'filters.static', null);
+        }
+        else {
+            $this->indexQueryFilters($query, Arr::get($metadata, 'filters.static'));
+        }
         $this->indexQueryFilters($query, Arr::get($metadata, 'filters.custom'));
 
         //-- orders
@@ -463,7 +482,7 @@ abstract class CrudHandler
         }
 
         return CrudJsonResponse::successful([
-            'action' => __FUNCTION__,
+            'action' => $request->input('__search__', false) ? 'search' : 'index',
             'metadata' => $metadata,
             'items' => $items,
         ]);

@@ -39,6 +39,7 @@ class CrudModel extends Model
             'table' => $this->table,
             'primaryKey' => !empty($this->primaryKey) ? $this->primaryKey : null,
             'filters' => [
+                'ignoreStatic' => false,
                 'static' => null,
                 'custom' => null,
                 'fields' => null,
@@ -91,11 +92,13 @@ class CrudModel extends Model
         }
 
         if (empty($this->metadata)) {
-            $this->metadata = $this->defaultMetadata();
+            $defaultMetadata = $this->defaultMetadata(); 
+            $this->metadata = $defaultMetadata;
 
             $this->metadata['fields'] = ($opt->getFields === true) ? $this->getFieldsMetadata() : null;
             $this->metadata['orders'] = ($opt->getOrders === true) ? $this->getOrdersMetadata() : null;
             $this->metadata['filters'] = ($opt->getFilters === true) ? $this->getFiltersMetadata($opt->filtersOptions) : null;
+            Arr::set($this->metadata, 'filters.ignoreStatic', Arr::get($defaultMetadata, 'filters.ignoreStatic', false));
             $this->metadata['grid'] = ($opt->getGrid === true) ? $this->getGridMetadata($opt->gridOptions) : null;
             $this->metadata['layout'] = ($opt->getLayout === true) ? $this->getLayoutMetadata() : null;
             $this->metadata['menu'] = ($opt->getMenu === true) ? $this->getMenuMetadata() : null;
@@ -258,6 +261,7 @@ class CrudModel extends Model
         $opt = Options::make($options, [
             'getStatic' => ['type' => 'boolean', 'default' => true],
             'getCustom' => ['type' => 'boolean', 'default' => true],
+            'getTemplate' => ['type' => 'boolean', 'default' => true],
             'getFields' => ['type' => 'boolean', 'default' => true],
             'getLayout' => ['type' => 'boolean', 'default' => true],
         ])->validate();
@@ -265,6 +269,7 @@ class CrudModel extends Model
         $filters = [
             'static' => ($opt->getStatic === true) ? $this->getPropertiesListFromSource('filtersStaticMetadata', Filter::class) : null,
             'custom' => ($opt->getCustom === true) ? $this->getPropertiesListFromSource('filtersCustomMetadata', Filter::class) : null,
+            'template' => ($opt->getCustom === true) ? $this->getPropertiesListFromSource('filtersTemplateMetadata', Filter::class) : null,
             'fields' => ($opt->getFields === true) ? $this->getPropertiesListFromSource('filtersFieldsMetadata', FieldProperties::class) : null,
             'layout' => ($opt->getLayout === true) ? $this->getFiltersLayoutMetadata() : null,
         ];
