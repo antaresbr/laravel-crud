@@ -55,6 +55,11 @@ class Menu extends AbstractMetadata
             'required' => false,
             'nullable' => true,
         ],
+        'api' => [
+            'type' => 'string',
+            'required' => false,
+            'nullable' => true,
+        ],
         'items' => [
             'type' => 'array',
             'required' => false,
@@ -113,6 +118,7 @@ class Menu extends AbstractMetadata
             'action' => array_key_exists('action', $menu) ? $menu['action'] : null,
             'component' => array_key_exists('component', $menu) ? $menu['component'] : null,
             'vars' => array_key_exists('vars', $menu) ? $menu['vars'] : null,
+            'api' => array_key_exists('api', $menu) ? $menu['api'] : null,
             'items' => array_key_exists('items', $menu) ? $menu['items'] : static::$prototype['items']['default'],
         ];
     }
