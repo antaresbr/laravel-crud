@@ -12,6 +12,7 @@ use Antares\Crud\Metadata\Menu;
 use Antares\Crud\Metadata\Order\Order;
 use Antares\Support\Arr;
 use Antares\Support\Options;
+use finfo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
@@ -613,6 +614,7 @@ class CrudModel extends Model
             $metadata = $this->getFieldsMetadata(true);
         }
 
+        $finfo = new finfo(FILEINFO_MIME_TYPE);
         foreach($data as &$item) {
             if ($item instanceof static) {
                 $keys = array_keys($item->getAttributes());
@@ -625,7 +627,7 @@ class CrudModel extends Model
                 if (array_key_exists($key, $metadata)) {
                     //-- blobs
                     if ($metadata[$key]['type'] == 'blob') {
-                        $item[$key] = base64_encode($item[$key]);
+                        $item[$key] = $finfo->buffer($item[$key]) .';base64:'. base64_encode($item[$key]);
                     }
                 }
             }
@@ -661,7 +663,15 @@ class CrudModel extends Model
                 if (array_key_exists($key, $metadata)) {
                     //-- blobs
                     if ($metadata[$key]['type'] == 'blob') {
-                        $item[$key] = base64_decode($item[$key]);
+                        $pieces = explode(';', $item[$key]);
+                        $blob = end($pieces);
+                        if (str_starts_with($blob, 'base64')) {
+                            $blob = substr($blob, 6);
+                        }
+                        if (str_starts_with($blob, ':')) {
+                            $blob = substr($blob, 1);
+                        }
+                        $item[$key] = base64_decode($blob);
                     }
                 }
             }
