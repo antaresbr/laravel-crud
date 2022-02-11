@@ -627,7 +627,8 @@ class CrudModel extends Model
                 if (array_key_exists($key, $metadata)) {
                     //-- blobs
                     if ($metadata[$key]['type'] == 'blob') {
-                        $item[$key] = $finfo->buffer($item[$key]) .';base64:'. base64_encode($item[$key]);
+                        $b64 = base64_encode($item[$key]);
+                        $item[$key] = empty($b64) ? null : $finfo->buffer($item[$key]) .';base64:'. $b64;
                     }
                 }
             }
@@ -671,7 +672,7 @@ class CrudModel extends Model
                         if (str_starts_with($blob, ':')) {
                             $blob = substr($blob, 1);
                         }
-                        $item[$key] = base64_decode($blob);
+                        $item[$key] = empty($blob) ? null : base64_decode($blob);
                     }
                 }
             }
