@@ -1,5 +1,4 @@
 <?php
-
 namespace Antares\Crud;
 
 use Antares\Crud\Http\CrudHttpErrors;
@@ -112,7 +111,7 @@ abstract class CrudHandler
         if ($opt->clearAfterUse === true) {
             $this->errors()->clear();
         }
-        
+
         return CrudJsonResponse::error(
             $opt->code,
             $opt->message,
@@ -256,13 +255,13 @@ abstract class CrudHandler
      */
     public function metadata(Request $request)
     {
-        $data =  [ 'action' => __FUNCTION__ ];
+        $data = ['action' => __FUNCTION__];
 
         if ($request->boolean('data.asDataSource')) {
             $data['asDataSource'] = TableDataSource::make(['model' => $this->model])->toArray();
         } else {
             $data['metadata'] = $this->model->metadata();
-            
+
             $rules = [];
             if ($this->validator) {
                 $rules['index'] = $this->validator->getRulesAsMetadata('index');
@@ -273,7 +272,7 @@ abstract class CrudHandler
             }
             $data['metadata']['rules'] = $rules;
         }
-        
+
         return CrudJsonResponse::successful($data);
     }
 
@@ -443,8 +442,7 @@ abstract class CrudHandler
         //-- filters
         if ($request->input('__search__', false) === true and $request->input('data.metadata.filters.ignoreStatic', false) === true) {
             Arr::set($metadata, 'filters.static', null);
-        }
-        else {
+        } else {
             $this->indexQueryFilters($query, Arr::get($metadata, 'filters.static'));
         }
         $this->indexQueryFilters($query, Arr::get($metadata, 'filters.custom'));
@@ -469,7 +467,7 @@ abstract class CrudHandler
         $perPage = Arr::get($metadata, 'pagination.perPage', 0);
 
         $resource = ($perPage > 0) ? $query->paginate($perPage) : $query->get();
-        
+
         $items = ($resource instanceof AbstractPaginator) ? $resource->items() : $resource->toArray();
         $metadata['pagination'] = CrudPagination::make($resource)->toArray();
 
@@ -742,7 +740,7 @@ abstract class CrudHandler
             $delta = $this->attributesFromData($item['delta']);
 
             $realDelta = [];
-            foreach($delta as $key => $value) {
+            foreach ($delta as $key => $value) {
                 if ($value !== $old[$key]) {
                     $realDelta[$key] = $value;
                 }
@@ -774,7 +772,11 @@ abstract class CrudHandler
                         continue;
                     }
                 }
-                if ($model->{$fieldName} != $old[$fieldName]) {
+                if (is_string($model->{$fieldName})) {
+                    if (rtrim($model->{$fieldName}) != $old[$fieldName]) {
+                        $dirty[] = $fieldName;
+                    }
+                } elseif ($model->{$fieldName} != $old[$fieldName]) {
                     $dirty[] = $fieldName;
                 }
             }
