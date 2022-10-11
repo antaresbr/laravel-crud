@@ -773,7 +773,7 @@ abstract class CrudHandler
                     }
                 }
                 if (is_string($model->{$fieldName})) {
-                    if (rtrim($model->{$fieldName}) != $old[$fieldName]) {
+                    if (trim($model->{$fieldName}) != $old[$fieldName]) {
                         $dirty[] = $fieldName;
                     }
                 } elseif ($model->{$fieldName} != $old[$fieldName]) {
