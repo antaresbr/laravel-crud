@@ -397,6 +397,10 @@ abstract class CrudHandler
                             $filter->conjunction,
                             ($filter->operator == 'not in')
                         );
+                    } elseif (Str::icIn($filter->operator, 'is null')) {
+                        $query->whereNull($filter->column);
+                    } elseif (Str::icIn($filter->operator, 'is not null')) {
+                        $query->whereNotNull($filter->column);
                     } else {
                         $query->where(
                             $filter->column,

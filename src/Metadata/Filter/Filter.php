@@ -28,6 +28,7 @@ class Filter extends AbstractMetadata
                 'values' => [
                     '=', '!=', '>', '<', '>=', '<=', '<>',
                     'in', 'not in', 'between', 'not between',
+                    'is null', 'is not null',
                     'like', 'not like', 'ilike', 'not ilike',
                     'similar to', 'not similar to',
                 ],
@@ -81,7 +82,7 @@ class Filter extends AbstractMetadata
         }
 
         if (!empty($this->column)) {
-            if (!$this->options->has('value')) {
+            if (!$this->options->has('value') and !Str::icIn($this->operator, 'is null', 'is not null')) {
                 throw FilterException::forPropertyNotSupplied('value');
             }
             if (Str::icIn($this->operator, 'between', 'not between') and !$this->options->has('endValue')) {
