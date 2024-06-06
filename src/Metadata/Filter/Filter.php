@@ -4,7 +4,8 @@ namespace Antares\Crud\Metadata\Filter;
 
 use Antares\Crud\CrudException;
 use Antares\Crud\Metadata\AbstractMetadata;
-use Antares\Support\Str;
+use Antares\Foundation\Arr;
+use Antares\Foundation\Str;
 use Illuminate\Database\Eloquent\Model;
 
 class Filter extends AbstractMetadata
@@ -98,8 +99,8 @@ class Filter extends AbstractMetadata
     public function normalizeToDatabaseDriver(Model $model)
     {
         $dbDriverName = $model->getConnection()->getDriverName();
-
-        if ($dbDriverName == 'mysql') {
+        
+        if (in_array($dbDriverName, ['mysql', 'sqlite'])) {
             $this->operator = ($this->operator == 'ilike') ? 'like' : $this->operator;
             $this->operator = ($this->operator == 'not ilike') ? 'not like' : $this->operator;
         }

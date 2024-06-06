@@ -21,8 +21,9 @@ class CrudController extends Controller
      */
     protected function handler()
     {
-        if (!isset($this->handlerInstance) and !empty($this->handlerClass)) {
-            $this->handlerInstance = $this->handlerClass::make();
+        if (!isset($this->handlerInstance)) {
+            $handlerClass = ai_foundation_property_value($this, 'handlerClass');
+            $this->handlerInstance = $handlerClass::make();
         }
         return $this->handlerInstance;
     }

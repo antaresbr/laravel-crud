@@ -3,9 +3,9 @@
 namespace Antares\Crud;
 
 use Antares\Crud\CrudException;
-use Antares\Support\Arr;
-use Antares\Support\Options;
-use Antares\Support\Str;
+use Antares\Foundation\Arr;
+use Antares\Foundation\Options\Options;
+use Antares\Foundation\Str;
 
 class CrudRuler
 {

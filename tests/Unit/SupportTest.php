@@ -1,8 +1,8 @@
 <?php declare(strict_types=1);
 
-namespace Antares\Crud\Tests\Unit;
+namespace Antares\Tests\Unit;
 
-use Antares\Crud\Tests\TestCase;
+use Antares\Tests\Package\TestCase;
 
 final class SupportTest extends TestCase
 {
@@ -29,10 +29,10 @@ final class SupportTest extends TestCase
     public function testInfos()
     {
         $infos = $this->getInfos();
-        $this->assertObjectHasAttribute('name', $infos);
-        $this->assertObjectHasAttribute('version', $infos);
-        $this->assertObjectHasAttribute('major', $infos->version);
-        $this->assertObjectHasAttribute('release', $infos->version);
-        $this->assertObjectHasAttribute('minor', $infos->version);
+        $this->assertObjectHasProperty('name', $infos);
+        $this->assertObjectHasProperty('version', $infos);
+        $this->assertObjectHasProperty('major', $infos->version);
+        $this->assertObjectHasProperty('release', $infos->version);
+        $this->assertObjectHasProperty('minor', $infos->version);
     }
 }

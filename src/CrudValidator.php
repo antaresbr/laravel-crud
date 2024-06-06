@@ -2,9 +2,8 @@
 
 namespace Antares\Crud;
 
-use Antares\Support\Arr;
-use Antares\Support\Str;
-use Antares\Support\Options;
+use Antares\Foundation\Options\Options;
+use Antares\Foundation\Str;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -33,11 +32,8 @@ class CrudValidator
      */
     public function defaultRules()
     {
-        if (property_exists($this, 'defaultRules') and !empty($this->defaultRules)) {
-            return $this->defaultRules;
-        }
-
-        return [];
+        $defaultRules = ai_foundation_property_value($this, 'defaultRules');
+        return !empty($defaultRules) ? $defaultRules : [];
     }
 
     /**

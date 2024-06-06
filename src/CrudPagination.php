@@ -2,7 +2,7 @@
 
 namespace Antares\Crud;
 
-use Antares\Support\Arr;
+use Antares\Foundation\Arr;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Pagination\AbstractPaginator;
 

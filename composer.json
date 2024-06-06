@@ -16,12 +16,10 @@
     ],
     "license": "MIT",
     "require": {
-        "php": ">=7",
-        "antaresbr/arrayhandler": "*",
+        "php": ">=8",
+        "antaresbr/foundation": "*",
         "antaresbr/laravel-http": "*",
-        "antaresbr/options": "*",
-        "antaresbr/picklist": "*",
-        "antaresbr/stringhandler": "*"
+        "antaresbr/picklist": "*"
     },
     "autoload": {
         "files": [
@@ -35,8 +33,14 @@
         "orchestra/testbench": "^6"
     },
     "autoload-dev": {
+        "files": [
+            "tests/Package/helpers.php",
+            "tests/TestCase/helpers.php"
+        ],
         "psr-4": {
-            "Antares\\Crud\\Tests\\": "tests/"
+            "App\\Http\\Controllers\\": "app/Http/Controllers/",
+            "Antares\\Tests\\Package\\": "tests/Package/",
+            "Antares\\Tests\\TestCase\\": "tests/TestCase/"
         }
     },
     "extra": {

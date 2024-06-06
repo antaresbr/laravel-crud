@@ -2,7 +2,7 @@
 
 namespace Antares\Crud\Metadata;
 
-use Antares\Support\Options;
+use Antares\Foundation\Options\Options;
 use ArrayAccess;
 use Countable;
 use IteratorAggregate;
@@ -21,7 +21,7 @@ abstract class AbstractMetadata implements ArrayAccess, Countable, IteratorAggre
     /**
      * Options object for this ruler source.
      *
-     * @var \Antares\Support\Options
+     * @var \Antares\Foundation\Options\Options
      */
     protected $options;
 

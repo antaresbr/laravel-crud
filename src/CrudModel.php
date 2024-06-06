@@ -10,8 +10,8 @@ use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Crud\Metadata\Layout\AbstractLayout;
 use Antares\Crud\Metadata\Menu;
 use Antares\Crud\Metadata\Order\Order;
-use Antares\Support\Arr;
-use Antares\Support\Options;
+use Antares\Foundation\Arr;
+use Antares\Foundation\Options\Options;
 use finfo;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -26,6 +26,16 @@ class CrudModel extends Model
     public function getApi()
     {
         return property_exists($this, 'api') ? $this->api : $this->getTable();
+    }
+
+    /**
+     * Get default perPage value
+     *
+     * @return array
+     */
+    public function defaultPerPage()
+    {
+        return config('crud.model.metadata.pagination.perPage', 30);
     }
 
     /**
@@ -47,7 +57,7 @@ class CrudModel extends Model
             ],
             'orders' => null,
             'pagination' => [
-                'perPage' => config('crud.model.metadata.pagination.perPage', 30),
+                'perPage' => $this->defaultPerPage(),
             ],
             'grid' => null,
             'layout' => null,

@@ -1,7 +1,13 @@
 #!/bin/bash
 
-params=$@
-[ -z "$params" ] && params="tests"
+if [ ! -d "tests/TestCase" ]
+then
+    repo="https://github.com/antaresbr/php-testcase.git"
+    git clone "${repo}" "tests/TestCase"
+    [ $? -eq 0 ] || { echo "ERROR: Fail to clone ${repo}"; exit 1; }
 
-./vendor/bin/phpunit --colors --testdox $params
+    composer dump-autoload
+    [ $? -eq 0 ] || { echo "ERROR: Fail dump composer autoload"; exit 1; }
+fi
 
+./vendor/bin/phpunit --colors --testdox "$@"
