@@ -2,6 +2,7 @@
 
 namespace Antares\Crud;
 
+use Antares\Foundation\Obj;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,7 @@ class CrudController extends Controller
     protected function handler()
     {
         if (!isset($this->handlerInstance)) {
-            $handlerClass = ai_foundation_property_value($this, 'handlerClass');
+            $handlerClass = Obj::get($this, 'handlerClass');
             $this->handlerInstance = $handlerClass::make();
         }
         return $this->handlerInstance;

@@ -6,6 +6,7 @@ use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Crud\Metadata\Filter\Filter;
 use Antares\Tests\Package\TestCase;
 use Antares\Foundation\Arr;
+use Antares\Foundation\Obj;
 use Antares\Tests\Package\Models\AppUser;
 use Antares\Tests\Package\Traits\AuthUserTrait;
 use Antares\Tests\TestCase\Traits\ResetDatabaseTrait;
@@ -428,7 +429,7 @@ abstract class CrudAbstractTestCase extends TestCase
         $model = new $this->testModelClass;
         $this->assertEquals($model->getApi(), Arr::get($json, 'data.metadata.api'));
         $this->assertEquals($model->getTable(), Arr::get($json, 'data.metadata.table'));
-        $this->assertEquals(ai_foundation_property_value($model, 'primaryKey'), Arr::get($json, 'data.metadata.primaryKey'));
+        $this->assertEquals(Obj::get($model, 'primaryKey'), Arr::get($json, 'data.metadata.primaryKey'));
         $this->assertFalse(Arr::get($json, 'data.metadata.menu'));
     }
 }

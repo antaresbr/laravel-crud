@@ -2,6 +2,7 @@
 
 namespace Antares\Crud;
 
+use Antares\Foundation\Obj;
 use Antares\Foundation\Options\Options;
 use Antares\Foundation\Str;
 use Illuminate\Support\Facades\Validator;
@@ -32,7 +33,7 @@ class CrudValidator
      */
     public function defaultRules()
     {
-        $defaultRules = ai_foundation_property_value($this, 'defaultRules');
+        $defaultRules = Obj::get($this, 'defaultRules');
         return !empty($defaultRules) ? $defaultRules : [];
     }
 
