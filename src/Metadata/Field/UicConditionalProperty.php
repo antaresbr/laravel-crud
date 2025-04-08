@@ -16,7 +16,7 @@ class UicConditionalProperty extends AbstractMetadata
                 'type' => 'string',
                 'required' => true,
                 'nullable' => false,
-                'values' => ['default', 'disabled', 'hidden'],
+                'values' => ['default', 'disabled', 'hidden', 'required'],
             ],
             'condition' => [
                 'type' => 'string',
