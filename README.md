@@ -1,2 +1,2 @@
 # laravel-crud
-A CRUD package for Laravel Framework
+A CRUD package for Laravel 8 Framework
