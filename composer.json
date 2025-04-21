@@ -16,10 +16,11 @@
     ],
     "license": "MIT",
     "require": {
-        "php": ">=8",
+        "php": "^8",
         "antaresbr/foundation": "*",
-        "antaresbr/laravel-http": "*",
-        "antaresbr/picklist": "*"
+        "antaresbr/laravel-http": "^8",
+        "antaresbr/picklist": "*",
+        "laravel/framework": "^8"
     },
     "autoload": {
         "files": [
