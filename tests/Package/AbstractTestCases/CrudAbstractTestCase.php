@@ -258,7 +258,7 @@ abstract class CrudAbstractTestCase extends TestCase
         $this->assertTrue(Arr::has($json, 'data.error.0.data.errors.id'));
         $this->assertIsArray(Arr::get($json, 'data.error.0.data.errors.id'));
         $this->assertTrue(Arr::has($json, 'data.error.0.data.errors.id.0'));
-        $this->assertEquals('The ID [id] must be an integer.', Arr::get($json, 'data.error.0.data.errors.id.0'));
+        $this->assertEquals('The ID [id] field must be an integer.', Arr::get($json, 'data.error.0.data.errors.id.0'));
         $this->assertTrue(Arr::has($json, 'data.error.0.data.source'));
         $this->assertIsArray(Arr::get($json, 'data.error.0.data.source'));
         $this->assertTrue(Arr::has($json, 'data.error.0.data.source.id'));
@@ -286,7 +286,7 @@ abstract class CrudAbstractTestCase extends TestCase
         $this->assertTrue(Arr::has($json, 'data.errors.id'));
         $this->assertIsArray(Arr::get($json, 'data.errors.id'));
         $modelKeyName = (new $this->testModelClass())->getkeyName();
-        $this->assertEquals(["The ID [{$modelKeyName}] must be an integer."],Arr::get($json, "data.errors.{$modelKeyName}"));
+        $this->assertEquals(["The ID [{$modelKeyName}] field must be an integer."],Arr::get($json, "data.errors.{$modelKeyName}"));
         $this->assertTrue(Arr::has($json, 'data.source'));
         $this->assertIsArray(Arr::get($json, 'data.source'));
         $this->assertCount(1, Arr::get($json, 'data.source'));
