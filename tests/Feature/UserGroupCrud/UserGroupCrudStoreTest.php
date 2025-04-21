@@ -5,6 +5,7 @@ namespace Antares\Tests\Feature\UserGroupCrud;
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\UserGroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserGroupCrudStoreTest extends UserGroupCrudAbstractTestCase
 {
@@ -15,26 +16,26 @@ class UserGroupCrudStoreTest extends UserGroupCrudAbstractTestCase
         $this->crudAction = 'store';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_store()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_first_user()
     {
         $this->localBootstrap();
@@ -42,7 +43,7 @@ class UserGroupCrudStoreTest extends UserGroupCrudAbstractTestCase
         $this->seedAndTestGroups(10);
     }
 
-    /** @test */
+    #[Test]
     public function store_with_empty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -73,7 +74,7 @@ class UserGroupCrudStoreTest extends UserGroupCrudAbstractTestCase
         $this->assertIsArray($json['data']);
     }
 
-    /** @test */
+    #[Test]
     public function store_one_successful()
     {
         $this->bootstrapAndAuthUser();
@@ -101,7 +102,7 @@ class UserGroupCrudStoreTest extends UserGroupCrudAbstractTestCase
         $this->assertCount(1, $this->testModelClass::all());
     }
 
-    /** @test */
+    #[Test]
     public function store_many_successful()
     {
         $this->bootstrapAndAuthUser();

@@ -4,6 +4,7 @@ namespace Antares\Tests\Feature\UserCrud;
 
 use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\UserCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserCrudShowTest extends UserCrudAbstractTestCase
 {
@@ -14,33 +15,33 @@ class UserCrudShowTest extends UserCrudAbstractTestCase
         $this->crudAction = 'show';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_show()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->localBootstrap();
         $this->seedAndTestUsers(20);
     }
 
-    /** @test */
+    #[Test]
     public function show_with_empty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -61,7 +62,7 @@ class UserCrudShowTest extends UserCrudAbstractTestCase
         $this->assertResponseError_showWithNoDataSupplied($json);
     }
 
-    /** @test */
+    #[Test]
     public function show_one_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -83,7 +84,7 @@ class UserCrudShowTest extends UserCrudAbstractTestCase
         $this->assertResponseErrorItem_targetDataModelNotFound(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function show_one_with_error_by_id()
     {
         $this->bootstrapAndAuthUser();
@@ -101,7 +102,7 @@ class UserCrudShowTest extends UserCrudAbstractTestCase
         $this->assertResponseErrorItem_targetDataModelNotFound(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function show_one_successful()
     {
         $this->bootstrapAndAuthUser();
@@ -125,7 +126,7 @@ class UserCrudShowTest extends UserCrudAbstractTestCase
         $this->assertModelData(Arr::get($data, 'data.items.0'), Arr::get($json, 'data.items.0'));
     }
 
-    /** @test */
+    #[Test]
     public function show_one_successful_by_id()
     {
         $this->bootstrapAndAuthUser();

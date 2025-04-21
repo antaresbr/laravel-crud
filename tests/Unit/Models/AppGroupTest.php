@@ -4,17 +4,18 @@ namespace Antares\Tests\Unit\Models;
 
 use Antares\Tests\Package\Models\AppGroup;
 use Antares\Tests\Package\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class AppGroupTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function new_model()
     {
         $model = new AppGroup();
         $this->assertInstanceOf(AppGroup::class, $model);
     }
 
-    /** @test */
+    #[Test]
     public function model_properties()
     {
         $model = new AppGroup();

@@ -4,6 +4,7 @@ namespace Antares\Tests\Feature\UserGroupCrud;
 
 use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\UserGroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
 {
@@ -14,33 +15,33 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         $this->crudAction = 'metadata';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_get_metadata()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function get_metadata()
     {
         $this->bootstrapAndAuthUser();
         $this->metadataRequest_get();
     }
 
-    /** @test */
+    #[Test]
     public function metadata_filters()
     {
         $this->bootstrapAndAuthUser();
@@ -133,7 +134,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         $this->assertFalse(Arr::get($json, 'data.metadata.filters.ignoreStatic'));
     }
 
-    /** @test */
+    #[Test]
     public function metadata_orders()
     {
         $this->bootstrapAndAuthUser();
@@ -150,7 +151,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         ], Arr::get($json, 'data.metadata.orders'));
     }
 
-    /** @test */
+    #[Test]
     public function metadata_pagination()
     {
         $this->bootstrapAndAuthUser();
@@ -164,7 +165,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         ], Arr::get($json, 'data.metadata.pagination'));
     }
 
-    /** @test */
+    #[Test]
     public function metadata_grid()
     {
         $this->bootstrapAndAuthUser();
@@ -199,7 +200,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         ], Arr::get($json, 'data.metadata.grid'));
     }
 
-    /** @test */
+    #[Test]
     public function metadata_layout()
     {
         $this->bootstrapAndAuthUser();
@@ -269,7 +270,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         ], Arr::get($json, 'data.metadata.layout'));
     }
 
-    /** @test */
+    #[Test]
     public function metadata_fields()
     {
         $this->bootstrapAndAuthUser();
@@ -1041,7 +1042,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         ], $item);
     }
 
-    /** @test */
+    #[Test]
     public function metadata_picklists()
     {
         $this->bootstrapAndAuthUser();
@@ -1053,7 +1054,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         $this->assertEquals([], Arr::get($json, 'data.metadata.picklists'));
     }
 
-    /** @test */
+    #[Test]
     public function metadata_rules()
     {
         $this->bootstrapAndAuthUser();
@@ -1083,7 +1084,7 @@ class UserGroupCrudMetadataTest extends UserGroupCrudAbstractTestCase
         ], Arr::get($json, 'data.metadata.rules'));
     }
 
-    /** @test */
+    #[Test]
     public function metadata_details()
     {
         $this->bootstrapAndAuthUser();

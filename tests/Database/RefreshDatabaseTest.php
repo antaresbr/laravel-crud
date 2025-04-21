@@ -5,25 +5,26 @@ namespace Antares\Tests\Database;
 use Antares\Tests\Package\TestCase;
 use Antares\Tests\TestCase\Models\User;
 use Antares\Tests\TestCase\Traits\RefreshDatabaseTrait;
+use PHPUnit\Framework\Attributes\Test;
 
 class RefreshDatabaseTest extends TestCase
 {
     use RefreshDatabaseTrait;
 
-    /** @test */
+    #[Test]
     public function refreshed_database()
     {
         //$this->refreshDatabase();
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->seedAndTestUsers();
     }
 
-    /** @test */
+    #[Test]
     public function check_persistency()
     {
         $this->assertCount(0, User::all());

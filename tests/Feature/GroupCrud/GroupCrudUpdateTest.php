@@ -5,6 +5,7 @@ namespace Antares\Tests\Feature\GroupCrud;
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\GroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
 {
@@ -15,26 +16,26 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->crudAction = 'update';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_update()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->localBootstrap();
@@ -42,7 +43,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->seedAndTestGroups(15);
     }
 
-    /** @test */
+    #[Test]
     public function update_with_empty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -73,7 +74,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->assertIsArray($json['data']);
     }
 
-    /** @test */
+    #[Test]
     public function update_with_with_different_array_lengths()
     {
         $this->bootstrapAndAuthUser();
@@ -102,7 +103,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->assertCount(0, Arr::get($json, 'data.old'));
     }
 
-    /** @test */
+    #[Test]
     public function update_one_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -138,7 +139,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->assertResponseErrorItem_dataValidationError(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function update_one_with_dirty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -175,7 +176,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->assertResponseErrorItem_targetDataModifiedByOthers(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function update_one_successful()
     {
         $this->bootstrapAndAuthUser();
@@ -210,7 +211,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->assertCount(0, Arr::get($json, 'data.error'));
     }
 
-    /** @test */
+    #[Test]
     public function update_many_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -252,7 +253,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function update_many_with_partial_success()
     {
         $this->bootstrapAndAuthUser();
@@ -298,7 +299,7 @@ class GroupCrudUpdateTest extends GroupCrudAbstractTestCase
         $this->assertResponseErrorItem_dataValidationError(1, $json, $data, 3);
     }
 
-    /** @test */
+    #[Test]
     public function update_many_successful()
     {
         $this->bootstrapAndAuthUser();

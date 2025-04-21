@@ -1,2 +1,2 @@
 # laravel-crud
-A CRUD package for Laravel 10 Framework
+A CRUD package for Laravel 11 Framework

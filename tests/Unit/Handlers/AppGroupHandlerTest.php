@@ -4,17 +4,18 @@ namespace Antares\Tests\Unit\Handlers;
 
 use Antares\Tests\Package\AbstractTestCases\HandlerAbstractTestCase;
 use Antares\Tests\Package\Http\Controllers\AppGroup\AppGroupHandler;
+use PHPUnit\Framework\Attributes\Test;
 
 class AppGroupHandlerTest extends HandlerAbstractTestCase
 {
-    /** @test */
+    #[Test]
     public function new_handler()
     {
         $handler = AppGroupHandler::make();
         $this->assertInstanceOf(AppGroupHandler::class, $handler);
     }
 
-    /** @test */
+    #[Test]
     public function handler_metadata()
     {
         $handler = AppGroupHandler::make();

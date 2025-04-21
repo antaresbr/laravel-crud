@@ -3,6 +3,7 @@
 namespace Antares\Tests\Feature\GroupCrud;
 
 use Antares\Tests\Package\AbstractTestCases\GroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class GroupCrudSearchTest extends GroupCrudAbstractTestCase
 {
@@ -13,26 +14,26 @@ class GroupCrudSearchTest extends GroupCrudAbstractTestCase
         $this->crudAction = 'search';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_index()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->localBootstrap();
@@ -40,28 +41,28 @@ class GroupCrudSearchTest extends GroupCrudAbstractTestCase
         $this->seedAndTestGroups(75);
     }
 
-    /** @test */
+    #[Test]
     public function search_with_default_data()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withDefaultData(null, 1, 75, 75);
     }
 
-    /** @test */
+    #[Test]
     public function search_with_ignoreStaticFilters()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withDefaultData(null, 1, 75, 75, true);
     }
 
-    /** @test */
+    #[Test]
     public function search_with_ignoreStaticFilters_and_customFilters_and_pagination()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withFiltersAndPagination(1, 25, 21, 60, 40, true);
     }
 
-    /** @test */
+    #[Test]
     public function search_with_ignoreStaticFilters_and_customFilters_and_pagination_second_page()
     {
         $this->bootstrapAndAuthUser();

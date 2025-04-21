@@ -7,6 +7,7 @@ use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\UserGroupCrudAbstractTestCase;
 use Antares\Tests\Package\Models\AppGroup;
 use Antares\Tests\Package\Models\AppUser;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserGroupCrudUpdateTest extends UserGroupCrudAbstractTestCase
 {
@@ -17,26 +18,26 @@ class UserGroupCrudUpdateTest extends UserGroupCrudAbstractTestCase
         $this->crudAction = 'update';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_update()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->localBootstrap();
@@ -45,7 +46,7 @@ class UserGroupCrudUpdateTest extends UserGroupCrudAbstractTestCase
         $this->seedAndTestUserGroups(30);
     }
 
-    /** @test */
+    #[Test]
     public function update_with_empty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -76,7 +77,7 @@ class UserGroupCrudUpdateTest extends UserGroupCrudAbstractTestCase
         $this->assertIsArray($json['data']);
     }
 
-    /** @test */
+    #[Test]
     public function update_with_with_different_array_lengths()
     {
         $this->bootstrapAndAuthUser();
@@ -105,7 +106,7 @@ class UserGroupCrudUpdateTest extends UserGroupCrudAbstractTestCase
         $this->assertCount(0, Arr::get($json, 'data.old'));
     }
 
-    /** @test */
+    #[Test]
     public function update_one_successful()
     {
         $this->bootstrapAndAuthUser();
@@ -141,7 +142,7 @@ class UserGroupCrudUpdateTest extends UserGroupCrudAbstractTestCase
         $this->assertCount(0, Arr::get($json, 'data.error'));
     }
 
-    /** @test */
+    #[Test]
     public function update_many_successful()
     {
         $this->bootstrapAndAuthUser();

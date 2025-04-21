@@ -5,6 +5,7 @@ namespace Antares\Tests\Feature\GroupCrud;
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\GroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
 {
@@ -15,26 +16,26 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         $this->crudAction = 'destroy';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_destroy()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->localBootstrap();
@@ -42,7 +43,7 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         $this->seedAndTestGroups(25);
     }
 
-    /** @test */
+    #[Test]
     public function destroy_with_empty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -63,7 +64,7 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         $this->assertResponseError_destroyWithNoDataSupplied($json);
     }
 
-    /** @test */
+    #[Test]
     public function destroy_one_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -80,7 +81,7 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         $this->assertResponseErrorItem_targetDataModelNotFound(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function destroy_one_successful()
     {
         $this->bootstrapAndAuthUser();
@@ -110,7 +111,7 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         $this->assertCount(24, $this->testModelClass::all());
     }
 
-    /** @test */
+    #[Test]
     public function destroy_one_successful_by_id()
     {
         $this->bootstrapAndAuthUser();
@@ -140,7 +141,7 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         $this->assertCount(23, $this->testModelClass::all());
     }
 
-    /** @test */
+    #[Test]
     public function destroy_many_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -177,7 +178,7 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function destroy_many_with_partial_success()
     {
         $this->bootstrapAndAuthUser();
@@ -217,7 +218,7 @@ class GroupCrudDestroyTest extends GroupCrudAbstractTestCase
         $this->assertCount(20, $this->testModelClass::all());
     }
 
-    /** @test */
+    #[Test]
     public function destroy_many_successful()
     {
         $this->bootstrapAndAuthUser();

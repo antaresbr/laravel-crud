@@ -4,10 +4,11 @@ namespace Antares\Tests\Unit\Metadata;
 
 use Antares\Crud\Metadata\Frame;
 use Antares\Tests\Package\TestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class FrameTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function new_metadata()
     {
         $obj = Frame::make([

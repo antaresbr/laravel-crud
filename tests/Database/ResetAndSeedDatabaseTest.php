@@ -7,6 +7,7 @@ use Antares\Tests\TestCase\Models\Group;
 use Antares\Tests\TestCase\Models\User;
 use Antares\Tests\TestCase\Models\UserGroup;
 use Antares\Tests\TestCase\Traits\ResetDatabaseTrait;
+use PHPUnit\Framework\Attributes\Test;
 
 class ResetAndSeedDatabaseTest extends TestCase
 {
@@ -16,37 +17,37 @@ class ResetAndSeedDatabaseTest extends TestCase
     private $groupCount = 5;
     private $userGroupCount = 10;
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->seedAndTestUsers();
     }
     
-    /** @test */
+    #[Test]
     public function seed_groups()
     {
         $this->seedAndTestGroups();
     }
     
-    /** @test */
+    #[Test]
     public function seed_user_groups()
     {
         $this->seedAndTestUserGroups();
     }
 
-    /** @test */
+    #[Test]
     public function check_persistency()
     {
         $this->assertCount($this->userCount, User::all());
