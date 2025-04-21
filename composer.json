@@ -18,9 +18,9 @@
     "require": {
         "php": "^8",
         "antaresbr/foundation": "*",
-        "antaresbr/laravel-http": "^8",
+        "antaresbr/laravel-http": "^9",
         "antaresbr/picklist": "*",
-        "laravel/framework": "^8"
+        "laravel/framework": "^9"
     },
     "autoload": {
         "files": [
@@ -31,7 +31,7 @@
         }
     },
     "require-dev": {
-        "orchestra/testbench": "^6"
+        "orchestra/testbench": "^7"
     },
     "autoload-dev": {
         "files": [
