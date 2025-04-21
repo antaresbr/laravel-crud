@@ -4,10 +4,11 @@ namespace Antares\Tests\Feature;
 
 use Antares\Tests\Package\TestCase;
 use Antares\Foundation\Arr;
+use PHPUnit\Framework\Attributes\Test;
 
 class AliveTest extends TestCase
 {
-    /** @test */
+    #[Test]
     public function get_alive()
     {
         $response = $this->get(config('testcase.route.prefix.api') . '/alive');

@@ -4,6 +4,7 @@ namespace Antares\Tests\Feature\GroupCrud;
 
 use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\GroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class GroupCrudShowTest extends GroupCrudAbstractTestCase
 {
@@ -14,26 +15,26 @@ class GroupCrudShowTest extends GroupCrudAbstractTestCase
         $this->crudAction = 'show';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_show()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->localBootstrap();
@@ -41,7 +42,7 @@ class GroupCrudShowTest extends GroupCrudAbstractTestCase
         $this->seedAndTestGroups(15);
     }
 
-    /** @test */
+    #[Test]
     public function show_with_empty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -62,7 +63,7 @@ class GroupCrudShowTest extends GroupCrudAbstractTestCase
         $this->assertResponseError_showWithNoDataSupplied($json);
     }
 
-    /** @test */
+    #[Test]
     public function show_one_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -84,7 +85,7 @@ class GroupCrudShowTest extends GroupCrudAbstractTestCase
         $this->assertResponseErrorItem_targetDataModelNotFound(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function show_one_with_error_by_id()
     {
         $this->bootstrapAndAuthUser();
@@ -102,7 +103,7 @@ class GroupCrudShowTest extends GroupCrudAbstractTestCase
         $this->assertResponseErrorItem_targetDataModelNotFound(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function show_one_successful()
     {
         $this->bootstrapAndAuthUser();
@@ -126,7 +127,7 @@ class GroupCrudShowTest extends GroupCrudAbstractTestCase
         $this->assertModelData(Arr::get($data, 'data.items.0'), Arr::get($json, 'data.items.0'));
     }
 
-    /** @test */
+    #[Test]
     public function show_one_successful_by_id()
     {
         $this->bootstrapAndAuthUser();

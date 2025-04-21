@@ -3,6 +3,7 @@
 namespace Antares\Tests\Feature\UserGroupCrud;
 
 use Antares\Tests\Package\AbstractTestCases\UserGroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class UserGroupCrudIndexTest extends UserGroupCrudAbstractTestCase
 {
@@ -13,26 +14,26 @@ class UserGroupCrudIndexTest extends UserGroupCrudAbstractTestCase
         $this->crudAction = 'index';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_index()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_data()
     {
         $this->localBootstrap();
@@ -41,42 +42,42 @@ class UserGroupCrudIndexTest extends UserGroupCrudAbstractTestCase
         $this->seedAndTestUserGroups(70);
     }
 
-    /** @test */
+    #[Test]
     public function index_with_default_data()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withDefaultData(null, 1, 70, 70);
     }
 
-    /** @test */
+    #[Test]
     public function index_with_default_data_second_page()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withDefaultData(2, 1, 70, 70);
     }
 
-    /** @test */
+    #[Test]
     public function index_last_page()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withDefaultData(2, 1, 70, 70);
     }
 
-    /** @test */
+    #[Test]
     public function search_with_ignoreStaticFilters()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withDefaultData(null, 1, 70, 70, true);
     }
 
-    /** @test */
+    #[Test]
     public function index_with_custom_filters_and_pagination()
     {
         $this->bootstrapAndAuthUser();
         $this->indexAndSearchRequest_withFiltersAndPagination(1, 15, 6, 45, 40);
     }
 
-    /** @test */
+    #[Test]
     public function index_with_custom_filters_and_pagination_second_page()
     {
         $this->bootstrapAndAuthUser();

@@ -5,6 +5,7 @@ namespace Antares\Tests\Feature\GroupCrud;
 use Antares\Crud\Http\CrudHttpErrors;
 use Antares\Foundation\Arr;
 use Antares\Tests\Package\AbstractTestCases\GroupCrudAbstractTestCase;
+use PHPUnit\Framework\Attributes\Test;
 
 class GroupCrudStoreTest extends GroupCrudAbstractTestCase
 {
@@ -15,33 +16,33 @@ class GroupCrudStoreTest extends GroupCrudAbstractTestCase
         $this->crudAction = 'store';
     }
 
-    /** @test */
+    #[Test]
     public function reset_database()
     {
         $this->resetDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function assert_refreshed_database()
     {
         $this->assertRefreshedDatabase();
     }
 
-    /** @test */
+    #[Test]
     public function unauthenticated_store()
     {
         $this->localBootstrap();
         $this->metadataRequest_getUnauthenticated();
     }
 
-    /** @test */
+    #[Test]
     public function seed_first_user()
     {
         $this->localBootstrap();
         $this->seedAndTestUsers(1);
     }
 
-    /** @test */
+    #[Test]
     public function store_with_empty_data()
     {
         $this->bootstrapAndAuthUser();
@@ -72,7 +73,7 @@ class GroupCrudStoreTest extends GroupCrudAbstractTestCase
         $this->assertIsArray($json['data']);
     }
 
-    /** @test */
+    #[Test]
     public function store_one_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -103,7 +104,7 @@ class GroupCrudStoreTest extends GroupCrudAbstractTestCase
         $this->assertResponseErrorItem_dataValidationError(0, $json, $data);
     }
 
-    /** @test */
+    #[Test]
     public function store_one_successful()
     {
         $this->bootstrapAndAuthUser();
@@ -131,7 +132,7 @@ class GroupCrudStoreTest extends GroupCrudAbstractTestCase
         $this->assertCount(1, $this->testModelClass::all());
     }
 
-    /** @test */
+    #[Test]
     public function store_many_with_error()
     {
         $this->bootstrapAndAuthUser();
@@ -166,7 +167,7 @@ class GroupCrudStoreTest extends GroupCrudAbstractTestCase
         }
     }
 
-    /** @test */
+    #[Test]
     public function store_many_with_partial_success()
     {
         $this->bootstrapAndAuthUser();
@@ -204,7 +205,7 @@ class GroupCrudStoreTest extends GroupCrudAbstractTestCase
         $this->assertCount(4, $this->testModelClass::all());
     }
 
-    /** @test */
+    #[Test]
     public function store_many_successful()
     {
         $this->bootstrapAndAuthUser();
