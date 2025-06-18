@@ -42,6 +42,8 @@ class Field extends AbstractField
 
         $p['hidden']['default'] = false;
 
+        $p['virtual']['default'] = false;
+
         return $p;
     }
 }
