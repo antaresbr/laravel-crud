@@ -108,6 +108,11 @@ abstract class AbstractField extends AbstractMetadata
                 'required' => false,
                 'nullable' => true,
             ],
+            'virtual' => [
+                'type' => 'boolean',
+                'required' => false,
+                'nullable' => true,
+            ],
             'default' => [
                 'type' => 'mixed',
                 'required' => false,
