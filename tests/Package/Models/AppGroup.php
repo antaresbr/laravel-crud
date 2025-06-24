@@ -52,6 +52,13 @@ class AppGroup extends AppModel
                 'length' => 255,
                 'uicCols' => 12,
             ]),
+            TextField::make([
+                'name' => 'virtualfield',
+                'label' => 'Virtual Field',
+                'length' => 255,
+                'uicCols' => 12,
+                'virtual' => true,
+            ]),
         ];
     }
 
@@ -142,5 +149,20 @@ class AppGroup extends AppModel
                 ],
             ])
         ];
+    }
+
+    public function calculateVirtualFields(array &$data, $metadata = null)
+    {
+        if (empty($data)) {
+            return;
+        }
+
+        if (!is_array($metadata)) {
+            $metadata = $this->getFieldsMetadata(true);
+        }
+
+        foreach($data as &$item) {
+            $item['virtualfield'] = 'virtual value ' . $item['id'];
+        }
     }
 }

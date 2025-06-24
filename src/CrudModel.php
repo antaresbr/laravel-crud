@@ -608,6 +608,33 @@ class CrudModel extends Model
     }
 
     /**
+     * Calculate virtual fields
+     *
+     * @param  array $data
+     * @param  array $metadata
+     * @return void
+     */
+    public function calculateVirtualFields(array &$data, $metadata = null)
+    {
+        //-- to be overrided in descendant classes to calculate virtual fields
+
+        /*
+        if (empty($data)) {
+            return;
+        }
+
+        //-- if metadata is necessary and not provided, get it
+        // if (!is_array($metadata)) {
+        //     $metadata = $this->getFieldsMetadata(true);
+        // }
+
+        foreach($data as &$item) {
+            $item['virtualfield'] = 'virtual value';
+        }
+        */
+    }
+
+    /**
      * Prepare data to send
      *
      * @param  array $data
@@ -635,7 +662,7 @@ class CrudModel extends Model
             }
             foreach($keys as $key) {
                 if (array_key_exists($key, $metadata)) {
-                    //-- blobs
+                    //-- blob
                     if ($metadata[$key]['type'] == 'blob') {
                         $b64 = base64_encode($item[$key]);
                         $item[$key] = empty($b64) ? null : 'data:' . $finfo->buffer($item[$key]) .';base64,'. $b64;
@@ -643,6 +670,8 @@ class CrudModel extends Model
                 }
             }
         }
+
+        $this->calculateVirtualFields($data, $metadata);
     }
 
     /**
@@ -672,7 +701,7 @@ class CrudModel extends Model
             }
             foreach($keys as $key) {
                 if (array_key_exists($key, $metadata)) {
-                    //-- blobs
+                    //-- blob
                     if ($metadata[$key]['type'] == 'blob') {
                         $pieces = explode(';', $item[$key]);
                         $blob = end($pieces);

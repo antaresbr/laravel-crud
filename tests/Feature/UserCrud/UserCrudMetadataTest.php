@@ -434,6 +434,7 @@ class UserCrudMetadataTest extends UserCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => true,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -463,6 +464,7 @@ class UserCrudMetadataTest extends UserCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => false,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -492,6 +494,7 @@ class UserCrudMetadataTest extends UserCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => false,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -521,6 +524,7 @@ class UserCrudMetadataTest extends UserCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => false,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -550,6 +554,7 @@ class UserCrudMetadataTest extends UserCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => true,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -579,6 +584,7 @@ class UserCrudMetadataTest extends UserCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => true,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -608,6 +614,7 @@ class UserCrudMetadataTest extends UserCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => false,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
