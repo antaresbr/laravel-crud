@@ -617,6 +617,21 @@ class CrudModel extends Model
     public function calculateVirtualFields(array &$data, $metadata = null)
     {
         //-- to be overrided in descendant classes to calculate virtual fields
+
+        /*
+        if (empty($data)) {
+            return;
+        }
+
+        //-- if metadata is necessary and not provided, get it
+        // if (!is_array($metadata)) {
+        //     $metadata = $this->getFieldsMetadata(true);
+        // }
+
+        foreach($data as &$item) {
+            $item['virtualfield'] = 'virtual value';
+        }
+        */
     }
 
     /**
