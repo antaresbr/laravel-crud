@@ -258,7 +258,7 @@ class GroupCrudMetadataTest extends GroupCrudAbstractTestCase
         $this->assertIsArray(Arr::get($json, 'data.metadata.fields'));
         $items = Arr::get($json, 'data.metadata.fields');
         $this->assertIsArray($items);
-        $this->assertCount(3, $items);
+        $this->assertCount(4, $items);
 
         $item = $items[0];
         $this->assertIsArray($item);
@@ -285,6 +285,7 @@ class GroupCrudMetadataTest extends GroupCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => true,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -314,6 +315,7 @@ class GroupCrudMetadataTest extends GroupCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => false,
             'hidden' => false,
+            'virtual' => false,
             'default' => null,
             'gridCols' => null,
         ], $item);
@@ -343,6 +345,37 @@ class GroupCrudMetadataTest extends GroupCrudAbstractTestCase
             'dataSource' => null,
             'disabled' => false,
             'hidden' => false,
+            'virtual' => false,
+            'default' => null,
+            'gridCols' => null,
+        ], $item);
+
+        $item = $items[3];
+        $this->assertIsArray($item);
+        $this->assertEquals([
+            'name' => 'virtualfield',
+            'label' => 'Virtual Field',
+            'tooltip' => null,
+            'placeholder' => null,
+            'type' => 'text',
+            'length' => 255,
+            'precision' => null,
+            'unsigned' => true,
+            'mask' => null,
+            'letterCase' => null,
+            'uic' => 'text',
+            'uicCols' => 12,
+            'uicWidth' => null,
+            'uicHeight' => null,
+            'uicPattern' => null,
+            'uicProperties' => [
+                'action' => [],
+                'conditional' => [],
+            ],
+            'dataSource' => null,
+            'disabled' => false,
+            'hidden' => false,
+            'virtual' => true,
             'default' => null,
             'gridCols' => null,
         ], $item);

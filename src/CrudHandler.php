@@ -745,6 +745,12 @@ abstract class CrudHandler
 
             $realDelta = [];
             foreach ($delta as $key => $value) {
+                if (array_key_exists($key, $metadata)) {
+                    //-- virtual
+                    if (Arr::get($metadata, "{$key}.virtual", false) === true) {
+                        continue;
+                    }
+                }
                 if ($value !== $old[$key]) {
                     $realDelta[$key] = $value;
                 }
@@ -771,7 +777,7 @@ abstract class CrudHandler
             $dirty = [];
             foreach (array_keys($delta) as $fieldName) {
                 if (array_key_exists($fieldName, $metadata)) {
-                    //-- blobs
+                    //-- blob
                     if ($metadata[$fieldName]['type'] == 'blob') {
                         continue;
                     }
