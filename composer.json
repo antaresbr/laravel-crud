@@ -15,6 +15,11 @@
         }
     ],
     "license": "MIT",
+    "config": {
+        "audit": {
+            "block-insecure": false
+        }
+    },
     "require": {
         "php": "^8",
         "antaresbr/foundation": "*",
